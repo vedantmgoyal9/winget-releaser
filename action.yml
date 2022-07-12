@@ -51,7 +51,7 @@ runs:
         # Setup working environment
         Install-Module -Name powershell-yaml -Repository PSGallery -Scope CurrentUser -Force # Install powershell-yaml module
         # Get WinGetDev from winget-pkgs-automation (vedantmgoyal2009/vedantmgoyal2009)
-        svn checkout https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/winget-pkgs-automation/wingetdev
+        svn checkout https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/tools/wingetdev
         # Set git user name, email and remotes
         git -C winget-pkgs config --local user.name '${{ github.repository_owner }}'
         git -C winget-pkgs config --local user.email '${{ github.event.repository.owner.id }}+${{ github.repository_owner }}@users.noreply.github.com'
