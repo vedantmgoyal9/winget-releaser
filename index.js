@@ -12,35 +12,23 @@ const { resolve } = require('path');
 
   // get the inputs from the action
   const pkgid = getInput('identifier');
-  const verRegex = getInput('version-regex');
+  const version = getInput('version');
   const instRegex = getInput('installers-regex');
+  const releaseTag = getInput('release-tag');
   const delPrevVersion = getBooleanInput('delete-previous-version');
   const token = getInput('token');
   const forkUser = getInput('fork-user');
 
-  // if the workflow was triggered on release event with released/prerelease event type,
-  // then get release info from the context, else using tag name
-  if (
-    context.eventName == 'release' &&
-    /(pre)?released/g.test(context.payload.action)
-  ) {
-    releaseInfo = context.payload.release;
-  } else {
-    const releaseTag = getInput('release-tag', { required: true }).replace(
-      'refs/tags/',
-      ''
-    );
-    releaseInfo = {
-      // get only data, and exclude status, url, and headers
-      ...(
-        await getOctokit(token).rest.repos.getReleaseByTag({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          tag: releaseTag,
-        })
-      ).data,
-    };
-  }
+  // get only data, and exclude status, url, and headers
+  releaseInfo = {
+    ...(
+      await getOctokit(token).rest.repos.getReleaseByTag({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        tag: releaseTag.replace('refs/tags/', ''),
+      })
+    ).data,
+  };
 
   // install powershell-yaml, clone winget-pkgs repo and configure remotes, update yamlcreate, and
   // download wingetdev from vedantmgoyal2009/vedantmgoyal2009 (winget-pkgs-automation)
@@ -96,7 +84,8 @@ const { resolve } = require('path');
   info(`::group::Update manifests and create pull request`);
   const inputObject = JSON.stringify({
     PackageIdentifier: pkgid,
-    PackageVersion: new RegExp(verRegex, 'g').exec(releaseInfo.tag_name)[0],
+    PackageVersion:
+      version || new RegExp(/[0-9.]+/g).exec(releaseInfo.tag_name)[0],
     InstallerUrls: releaseInfo.assets
       .filter((asset) => {
         return new RegExp(instRegex, 'g').test(asset.name);

@@ -4,10 +4,9 @@ inputs:
   identifier:
     required: true
     description: The PackageIdentifier of the package you want to release.
-  version-regex:
-    required: true
-    description: The regex to use to extract the version from the tag name.
-    default: '[0-9.]+'
+  version:
+    required: false
+    description: The PackageVersion of the package you want to release.
   installers-regex:
     required: true
     description: The regex to match the installers.
@@ -15,10 +14,11 @@ inputs:
   delete-previous-version:
     required: true
     description: Whether to delete the last version.
-    default: "false"
+    default: 'false'
   release-tag:
-    required: false
+    required: true
     description: The release tag to be used for creating manifests.
+    default: ${{ github.release.tag_name || github.ref }}
   token:
     required: true
     description: GitHub token to create pull request on Windows Package Manager Community Repository.

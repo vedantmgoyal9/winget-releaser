@@ -420,10 +420,6 @@ Function Get-MultiManifestParameter {
     return ($_vals -join ', ')
 }
 
-Function Get-DebugString {
-    return " $debug=QUSU.$($PSVersionTable.PSVersion -Replace '\.', '-')"
-}
-
 # Take all the entered values and write the version manifest file
 Function Write-VersionManifest {
     # Create new empty manifest
@@ -452,7 +448,7 @@ Function Write-VersionManifest {
     $VersionManifestPath = $AppFolder + "\$PackageIdentifier" + '.yaml'
 
     # Write the manifest to the file
-    $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json`n" > $VersionManifestPath
+    $ScriptHeader + " `$debug=QUSU.$($PSVersionTable.PSVersion -Replace '\.', '-')`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json`n" > $VersionManifestPath
     ConvertTo-Yaml $VersionManifest >> $VersionManifestPath
     $(Get-Content $VersionManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $VersionManifestPath -Force
     $MyRawString = Get-Content -Raw $VersionManifestPath | TrimString
@@ -577,7 +573,7 @@ Function Write-InstallerManifest {
     $script:InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
 
     # Write the manifest to the file
-    $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json`n" > $InstallerManifestPath
+    $ScriptHeader + " `$debug=QUSU.$($PSVersionTable.PSVersion -Replace '\.', '-')`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json`n" > $InstallerManifestPath
     ConvertTo-Yaml $InstallerManifest >> $InstallerManifestPath
     $(Get-Content $InstallerManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $InstallerManifestPath -Force
     $MyRawString = Get-Content -Raw $InstallerManifestPath | TrimString
@@ -651,7 +647,7 @@ Function Write-LocaleManifest {
     $script:LocaleManifestPath = $AppFolder + "\$PackageIdentifier" + '.locale.' + "$PackageLocale" + '.yaml'
 
     # Write the manifest to the file
-    $ScriptHeader + "$(Get-DebugString)`n$yamlServer`n" > $LocaleManifestPath
+    $ScriptHeader + " `$debug=QUSU.$($PSVersionTable.PSVersion -Replace '\.', '-')`n$yamlServer`n" > $LocaleManifestPath
     ConvertTo-Yaml $LocaleManifest >> $LocaleManifestPath
     $(Get-Content $LocaleManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $LocaleManifestPath -Force
     $MyRawString = Get-Content -Raw $LocaleManifestPath | TrimString
@@ -677,7 +673,7 @@ Function Write-LocaleManifest {
 
                 $yamlServer = "# yaml-language-server: `$schema=https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json"
 
-                $ScriptHeader + "$(Get-DebugString)`n$yamlServer`n" > ($AppFolder + '\' + $DifLocale.Name)
+                $ScriptHeader + " `$debug=QUSU.$($PSVersionTable.PSVersion -Replace '\.', '-')`n$yamlServer`n" > ($AppFolder + '\' + $DifLocale.Name)
                 ConvertTo-Yaml $OldLocaleManifest >> ($AppFolder + '\' + $DifLocale.Name)
                 $(Get-Content $($AppFolder + '\' + $DifLocale.Name) -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $($AppFolder + '\' + $DifLocale.Name) -Force
                 $MyRawString = Get-Content -Raw $($AppFolder + '\' + $DifLocale.Name) | TrimString
