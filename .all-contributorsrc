@@ -1,0 +1,25 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "russellbanks",
+      "name": "Russell Banks",
+      "avatar_url": "https://avatars.githubusercontent.com/u/74878137?v=4",
+      "profile": "http://russell.bandev.uk",
+      "contributions": [
+        "ideas",
+        "doc"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "winget-releaser",
+  "projectOwner": "vedantmgoyal2009",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
