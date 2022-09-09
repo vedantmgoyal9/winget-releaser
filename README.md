@@ -9,9 +9,9 @@
     Publish new releases of your application to the Windows Package Manager easily.
     <br/>
     <br/>
-    <a href="https://github.com/vedantmgoyal2009/winget-releaser/issues">Report Bug</a>
+    <a href="https://github.com/vedantmgoyal2009/winget-releaser/issues/new?assignees=vedantmgoyal2009&labels=bug%2Chelp+wanted&template=bug.yml&title=%5BBug%5D%3A+">Report Bug</a>
     .
-    <a href="https://github.com/vedantmgoyal2009/winget-releaser/issues">Request Feature</a>
+    <a href="https://github.com/vedantmgoyal2009/winget-releaser/issues/new?assignees=vedantmgoyal2009&labels=feat&template=feat.yml&title=%5BFeature%2FIdea%5D%3A+">Request Feature</a>
   </p>
 </p>
 
