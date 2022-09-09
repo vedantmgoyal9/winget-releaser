@@ -1,5 +1,8 @@
 <br/>
 <p align="center">
+  <a href="https://github.com/ vedantmgoyal2009 /winget-releaser">
+    <img src="https://user-images.githubusercontent.com/83997633/189393292-4a470cc3-38e6-4f91-bee2-1d59e672ec81.svg" alt="Logo" width="80" height="80">
+  </a>
   <h3 align="center">WinGet Releaser (GitHub Action)</h3>
 
   <p align="center">
