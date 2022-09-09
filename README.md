@@ -1,12 +1,30 @@
-# WinGet Releaser (GitHub Action)
+<br/>
+<p align="center">
+  <h3 align="center">WinGet Releaser (GitHub Action)</h3>
 
-[![Documentation][docs-badge]][docs]
-[![Issues][issues-badge]][issues]
+  <p align="center">
+    Publish new releases of your application to the Windows Package Manager easily.
+    <br/>
+    <br/>
+    <a href="https://github.com/vedantmgoyal2009/winget-releaser/issues">Report Bug</a>
+    .
+    <a href="https://github.com/vedantmgoyal2009/winget-releaser/issues">Request Feature</a>
+  </p>
+</p>
 
-Publish new releases of your application to the [Windows Package Manager][winget-pkgs-repo] easily.
+![Issues](https://img.shields.io/github/issues/vedantmgoyal2009/winget-releaser) ![License](https://img.shields.io/github/license/vedantmgoyal2009/winget-releaser) 
 
-- Workflow with the minimal configuration:
+## About The Project
 
+![Screen Shot](https://user-images.githubusercontent.com/74878137/189383287-a873af57-08cd-4154-9848-a7c661af784c.png)
+
+Creating manifests and pull requests for every release of your application can be time-consuming and error-prone.
+
+WinGet Releaser allows you to automate this process, with pull requests that are trusted amongst the community, often expediting the amount of time it takes for a submission to be reviewed.
+
+## Usage
+
+### Workflow with minimal configuration:
 ```yaml
 name: Publish to WinGet
 on:
@@ -14,39 +32,90 @@ on:
     types: [released]
 jobs:
   publish:
-    runs-on: windows-latest # action can only be run on windows
+    runs-on: windows-latest # Action can only be run on windows
     steps:
       - uses: vedantmgoyal2009/winget-releaser@latest
         with:
-          identifier: Package.Identifier
-          token: ${{ secrets.WINGET_TOKEN }}
+          identifier: Package.Identifier # Identifier of package on winget-pkgs
+          token: ${{ secrets.WINGET_TOKEN }} # Personal Access Token of submitting user
 ```
 
-- Workflow using all the available configuration options:
+## Configuration
+
+### Package Identifier (identifier)
+  - Required: ✅
+
+  The package identifier of the package to be updated in the [Windows Package Manager Community Repository](https://github.com/microsoft/winget-pkgs). For example, `Microsoft.Excel`.
 
 ```yaml
-name: Publish to WinGet
-on:
-  release:
-    types: [released]
-jobs:
-  publish:
-    runs-on: windows-latest # action can only be run on windows
-    steps:
-      - uses: vedantmgoyal2009/winget-releaser@latest
-        with:
-          identifier: Package.Identifier
-          version-regex: '[0-9.]+'
-          installers-regex: '\.exe$' # only .exe files
-          delete-previous-version: 'false' # don't forget the quotes
-          token: ${{ secrets.WINGET_TOKEN }}
-          fork-user: <github-username> # don't put "@" when writing username, defaults to repository owner/organization
+identifier: Publisher.Package
 ```
 
-> **Note** All updates will be pushed to the **_latest_** tag, so you don't have to update version tag in your workflow manually everytime, when the action is updated 🙂
+### Version Regex (version-regex)
+  - Required: ❌
 
-[docs-badge]: https://img.shields.io/badge/Documentation-bittu.eu.org-blue
-[docs]: https://bittu.eu.org/docs/wr-intro
-[issues-badge]: https://img.shields.io/badge/Issues-Click%20here!-important
-[issues]: https://github.com/vedantmgoyal2009/vedantmgoyal2009/issues/new/choose
-[winget-pkgs-repo]: https://github.com/microsoft/winget-pkgs
+The regex to grab the version number from the GitHub release tag.
+  
+```yaml
+version-regex: '[0-9.]+'
+```
+  
+> **Tip** If you follow [semantic versioning](https://semver.org/) guidelines, and the package version is the same version as in your GitHub release tag, you can safely ignore this. The action will automatically grab the latest version number from release tag.
+
+### Installers Regex (installers-regex)
+  - Required: ❌
+
+```yaml
+installers-regex: '\.exe$'
+```
+
+Common Regular Expressions:
+```yaml
+'\.msi$' # All MSI's
+'\.exe$' # All EXE's
+'\.(exe|msi)' # All EXE's and MSI's
+```
+
+### Delete Previous Version (delete-previous-version)
+  - Required: ❌
+
+Set this to true if you want to overwrite the previous version of the package with the latest version.
+
+```yaml
+delete-previous-version: 'false'
+```
+
+### Token (token)
+  - Required: ✅
+
+This is the GitHub token with which the action will authenticate with GitHub and create a pull request on the winget-pkgs repository.
+
+#### The token should have the `public_repo` scope.
+
+> **Caution** Do **not** directly put the token in the action. Instead, create a repository secret containing the token and use that in the workflow. See [using encrypted secrets in a workflow](https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow) for more details.
+
+## Roadmap
+
+See the [open issues](https://github.com/vedantmgoyal2009/winget-releaser/issues) for a list of proposed features (and known issues).
+
+## Contributing
+
+Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+* If you have suggestions for adding or removing projects, feel free to [open an issue](https://github.com/vedantmgoyal2009/winget-releaser/issues/new) to discuss it, or directly create a pull request after you edit the *README.md* file with necessary changes.
+* Please make sure you check your spelling and grammar.
+* Create individual PR for each suggestion.
+* Please also read through the [Code Of Conduct](https://github.com/vedantmgoyal2009/winget-releaser/blob/main/CODE_OF_CONDUCT.md) before posting your first idea as well.
+
+### Creating A Pull Request
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+[![GNU AGPLv3 Logo](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.en.html)
+
+WinGet Releaser is Free Software: You can use, study share and improve it at your will. Specifically you can redistribute and/or modify it under the terms of the GNU General Affero Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
