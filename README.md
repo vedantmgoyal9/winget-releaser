@@ -18,7 +18,6 @@
     <img alt="GitHub issues" src="https://img.shields.io/github/issues/vedantmgoyal2009/winget-releaser?style=for-the-badge">
     <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/vedantmgoyal2009/winget-releaser?style=for-the-badge">
     <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/vedantmgoyal2009/winget-releaser?style=for-the-badge">
-    <img alt="GitHub forks" src="https://img.shields.io/github/forks/vedantmgoyal2009/winget-releaser?style=for-the-badge">
     <img alt="GitHub" src="https://img.shields.io/github/license/vedantmgoyal2009/winget-releaser?style=for-the-badge">
   </p>
 </p>
