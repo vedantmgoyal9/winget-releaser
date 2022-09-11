@@ -2,8 +2,16 @@
   "files": [
     "README.md"
   ],
-  "imageSize": 100,
+  "imageSize": 90,
   "commit": false,
+  "contributorsPerLine": 7,
+  "contributorsSortAlphabetically": true,
+  "projectName": "winget-releaser",
+  "projectOwner": "vedantmgoyal2009",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true,
+  "commitConvention": "angular",
   "contributors": [
     {
       "login": "russellbanks",
@@ -15,11 +23,5 @@
         "doc"
       ]
     }
-  ],
-  "contributorsPerLine": 7,
-  "projectName": "winget-releaser",
-  "projectOwner": "vedantmgoyal2009",
-  "repoType": "github",
-  "repoHost": "https://github.com",
-  "skipCi": true
+  ]
 }
