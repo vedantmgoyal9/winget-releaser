@@ -9,14 +9,18 @@
     <br/>
     <br/>
     <a href="https://github.com/vedantmgoyal2009/winget-releaser/issues/new?assignees=vedantmgoyal2009&labels=bug%2Chelp+wanted&template=bug.yml&title=%5BBug%5D%3A+">Report Bug</a>
-    .
+    •
     <a href="https://github.com/vedantmgoyal2009/winget-releaser/issues/new?assignees=vedantmgoyal2009&labels=feat&template=feat.yml&title=%5BFeature%2FIdea%5D%3A+">Request Feature</a>
   </p>
-</p>
 
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-) ![Issues](https://img.shields.io/github/issues/vedantmgoyal2009/winget-releaser) ![License](https://img.shields.io/github/license/vedantmgoyal2009/winget-releaser) 
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+  <p align="center">
+    <img alt="GitHub contributors (via allcontributors.org)" src="https://img.shields.io/github/all-contributors/vedantmgoyal2009/winget-releaser/main?style=for-the-badge">
+    <img alt="GitHub issues" src="https://img.shields.io/github/issues/vedantmgoyal2009/winget-releaser?style=for-the-badge">
+    <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/vedantmgoyal2009/winget-releaser?style=for-the-badge">
+    <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/vedantmgoyal2009/winget-releaser?style=for-the-badge">
+    <img alt="GitHub" src="https://img.shields.io/github/license/vedantmgoyal2009/winget-releaser?style=for-the-badge">
+  </p>
+</p>
 
 ## About The Project
 
@@ -112,7 +116,8 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tbody>
     <tr>
-      <td align="center"><a href="http://russell.bandev.uk"><img src="https://avatars.githubusercontent.com/u/74878137?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Russell Banks</b></sub></a><br /><a href="#ideas-russellbanks" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/vedantmgoyal2009/winget-releaser/commits?author=russellbanks" title="Documentation">📖</a></td>
+      <td align="center"><a href="http://russell.bandev.uk"><img src="https://avatars.githubusercontent.com/u/74878137?v=4?s=90" width="90px;" alt=""/><br /><sub><b>Russell Banks</b></sub></a><br /><a href="#ideas-russellbanks" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/vedantmgoyal2009/winget-releaser/commits?author=russellbanks" title="Documentation">📖</a></td>
+      <td align="center"><a href="https://bittu.eu.org"><img src="https://avatars.githubusercontent.com/u/83997633?v=4?s=90" width="90px;" alt=""/><br /><sub><b>Vedant</b></sub></a><br /><a href="https://github.com/vedantmgoyal2009/winget-releaser/commits?author=vedantmgoyal2009" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
