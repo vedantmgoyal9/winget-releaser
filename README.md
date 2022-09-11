@@ -9,14 +9,19 @@
     <br/>
     <br/>
     <a href="https://github.com/vedantmgoyal2009/winget-releaser/issues/new?assignees=vedantmgoyal2009&labels=bug%2Chelp+wanted&template=bug.yml&title=%5BBug%5D%3A+">Report Bug</a>
-    .
+    •
     <a href="https://github.com/vedantmgoyal2009/winget-releaser/issues/new?assignees=vedantmgoyal2009&labels=feat&template=feat.yml&title=%5BFeature%2FIdea%5D%3A+">Request Feature</a>
   </p>
-</p>
 
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+  <p align="center">
+    <img alt="GitHub contributors (via allcontributors.org)" src="https://img.shields.io/github/all-contributors/vedantmgoyal2009/winget-releaser/main?style=for-the-badge">
+    <img alt="GitHub issues" src="https://img.shields.io/github/issues/vedantmgoyal2009/winget-releaser?style=for-the-badge">
+    <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/vedantmgoyal2009/winget-releaser?style=for-the-badge">
+    <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/vedantmgoyal2009/winget-releaser?style=for-the-badge">
+    <img alt="GitHub forks" src="https://img.shields.io/github/forks/vedantmgoyal2009/winget-releaser?style=for-the-badge">
+    <img alt="GitHub" src="https://img.shields.io/github/license/vedantmgoyal2009/winget-releaser?style=for-the-badge">
+  </p>
+</p>
 
 ## About The Project
 
