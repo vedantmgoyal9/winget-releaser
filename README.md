@@ -59,16 +59,14 @@ jobs:
 identifier: Publisher.Package
 ```
 
-### Version Regex (version-regex)
+### Version (version)
   - Required: ❌
 
-The regex to grab the version number from the GitHub release tag.
+The `PackageVersion` of the package you want to release.
   
 ```yaml
-version-regex: '[0-9.]+'
+version: '1.2.3'
 ```
-  
-> **Tip** If you follow [semantic versioning](https://semver.org/) guidelines, and the package version is the same version as in your GitHub release tag, you can safely ignore this. The action will automatically grab the latest version number from release tag.
 
 ### Installers Regex (installers-regex)
   - Required: ❌
@@ -90,7 +88,16 @@ Common Regular Expressions:
 Set this to true if you want to overwrite the previous version of the package with the latest version.
 
 ```yaml
-delete-previous-version: 'false'
+delete-previous-version: 'true'
+```
+
+### Release tag (release-tag)
+  - Required: ❌ (Defaults to the GitHub release tag name)
+
+This is the release tag to be used for creating the manifest.
+
+```yaml
+release-tag: 3.2.1
 ```
 
 ### Token (token)
@@ -98,10 +105,22 @@ delete-previous-version: 'false'
 
 This is the GitHub token with which the action will authenticate with GitHub and create a pull request on the winget-pkgs repository.
 
+```yaml
+token: ${{ secrets.WINGET_TOKEN }} # Repository secret called 'WINGET_TOKEN`
+```
+
 #### The token should have the `public_repo` scope.
 
 > **Caution** Do **not** directly put the token in the action. Instead, create a repository secret containing the token and use that in the workflow. See [using encrypted secrets in a workflow](https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow) for more details.
 
+### Use fork under which user (fork-user)
+  - Required: ❌ (Defaults to the GitHub repository owner)
+
+This is the GitHub username of the user where the fork of [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs) is present.
+
+```yaml
+fork-user: JohnDoe123
+```
 ## Roadmap
 
 See the [open issues](https://github.com/vedantmgoyal2009/winget-releaser/issues) for a list of proposed features (and known issues).
@@ -128,9 +147,3 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
-
-## License
-
-[![GNU AGPLv3 Logo](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.en.html)
-
-WinGet Releaser is Free Software: You can use, study share and improve it at your will. Specifically you can redistribute and/or modify it under the terms of the GNU General Affero Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
