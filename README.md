@@ -1,38 +1,36 @@
-<p align="center">
-  <a href="https://github.com/vedantmgoyal2009/winget-releaser">
-    <img src="https://user-images.githubusercontent.com/83997633/189393292-4a470cc3-38e6-4f91-bee2-1d59e672ec81.svg" alt="Logo" width="80" height="80">
-  </a>
-  <h3 align="center">WinGet Releaser (GitHub Action)</h3>
+<h1> <img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/github-actions-logo.png" width="32" height="32" /> WinGet Releaser (GitHub Action) </h1>
 
-  <p align="center">
-    Publish new releases of your application to the Windows Package Manager easily.
-    <br/>
-    <br/>
-    <a href="https://github.com/vedantmgoyal2009/winget-releaser/issues/new?assignees=vedantmgoyal2009&labels=bug%2Chelp+wanted&template=bug.yml&title=%5BBug%5D%3A+">Report Bug</a>
-    •
-    <a href="https://github.com/vedantmgoyal2009/winget-releaser/issues/new?assignees=vedantmgoyal2009&labels=feat&template=feat.yml&title=%5BFeature%2FIdea%5D%3A+">Request Feature</a>
-  </p>
+![GitHub contributors (via allcontributors.org)][github-all-contributors-badge]
+![GitHub issues][github-issues-badge]
+![GitHub release (latest by date)][github-release-badge]
+![GitHub Repo stars][github-repo-stars-badge]
+![GitHub][github-license-badge]
+[![Playground-dry-run][playground-dry-run-badge]][playground-dry-run]
 
-  <p align="center">
-    <img alt="GitHub contributors (via allcontributors.org)" src="https://img.shields.io/github/all-contributors/vedantmgoyal2009/winget-releaser/main?style=for-the-badge">
-    <img alt="GitHub issues" src="https://img.shields.io/github/issues/vedantmgoyal2009/winget-releaser?style=for-the-badge">
-    <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/vedantmgoyal2009/winget-releaser?style=for-the-badge">
-    <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/vedantmgoyal2009/winget-releaser?style=for-the-badge">
-    <img alt="GitHub" src="https://img.shields.io/github/license/vedantmgoyal2009/winget-releaser?style=for-the-badge">
-  </p>
-</p>
+Publish new releases of your application to the Windows Package Manager easily.
 
-## About The Project
-
-![Screen Shot](https://user-images.githubusercontent.com/74878137/189383287-a873af57-08cd-4154-9848-a7c661af784c.png)
+![pr-example-screenshot][pr-screenshot-image]
 
 Creating manifests and pull requests for every release of your application can be time-consuming and error-prone.
 
 WinGet Releaser allows you to automate this process, with pull requests that are trusted amongst the community, often expediting the amount of time it takes for a submission to be reviewed.
 
-## Usage
+## Getting Started 🚀
 
-### Workflow with minimal configuration:
+1. You will need to create a Personal Access Token (PAT) with `public_repo` scope.
+
+<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pat-scope.png" />
+
+2. Fork the [winget-pkgs][winget-pkgs-repo] repository under the same account/organization as your repository on which you want to use this action.
+
+<table>
+<tr>
+<th align="center"> Workflow with the minimal configuration </th>
+<th align="center"> Workflow with a filter to only publish .exe files </th>
+</tr>
+<tr>
+<td>
+
 ```yaml
 name: Publish to WinGet
 on:
@@ -40,90 +38,176 @@ on:
     types: [released]
 jobs:
   publish:
-    runs-on: windows-latest # Action can only be run on windows
+    # Action can only be run on windows
+    runs-on: windows-latest
     steps:
       - uses: vedantmgoyal2009/winget-releaser@latest
         with:
-          identifier: Package.Identifier # Identifier of package on winget-pkgs
-          token: ${{ secrets.WINGET_TOKEN }} # Personal Access Token of submitting user
+          identifier: Package.Identifier
+          token: ${{ secrets.WINGET_TOKEN }}
 ```
 
-## Configuration
-
-### Package Identifier (identifier)
-  - Required: ✅
-
-  The package identifier of the package to be updated in the [Windows Package Manager Community Repository](https://github.com/microsoft/winget-pkgs). For example, `Microsoft.Excel`.
+</td>
+<td>
 
 ```yaml
-identifier: Publisher.Package
+name: Publish to WinGet
+on:
+  release:
+    types: [released]
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - uses: vedantmgoyal2009/winget-releaser@latest
+        with:
+          identifier: Package.Identifier
+          installers-regex: '\.exe$' # Only .exe files
+          token: ${{ secrets.WINGET_TOKEN }}
+```
+
+</td>
+</tr>
+<tr>
+<th align="center"> Workflow to publish multiple packages </th>
+<th align="center"> Workflow with implementation of custom package version </th>
+</tr>
+<tr>
+<td>
+
+```yaml
+name: Publish to WinGet
+on:
+  release:
+    types: [released]
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - name: Publish X to WinGet
+        uses: vedantmgoyal2009/winget-releaser@latest
+        with:
+          identifier: Package.Identifier<X>
+          installers-regex: '\.exe$' # Only .exe files
+          token: ${{ secrets.WINGET_TOKEN }}
+      - name: Publish Y to WinGet
+        uses: vedantmgoyal2009/winget-releaser@latest
+        with:
+          identifier: Package.Identifier<Y>
+          installers-regex: '\.msi$' # Only .msi files
+          token: ${{ secrets.WINGET_TOKEN }}
+```
+
+</td>
+<td>
+
+```yaml
+name: Publish to WinGet
+on:
+  release:
+    types: [released]
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - name: Get version
+        id: get-version
+        run: |
+          # Finding the version from release name
+          $VERSION="${{ github.event.release.name }}" -replace '^.*/ '
+          echo "::set-output name=version::$VERSION"
+        shell: pwsh
+      - uses: vedantmgoyal2009/winget-releaser@latest
+        with:
+          identifier: Package.Identifier
+          version: ${{ steps.get-version.outputs.version }}
+          token: ${{ secrets.WINGET_TOKEN }}
+```
+
+</td>
+</tr>
+</table>
+
+## Configuration Options
+
+### Package Identifier (identifier)
+
+- Required: ✅
+
+The package identifier of the package to be updated in the [Windows Package Manager Community Repository][winget-pkgs-repo].
+
+```yaml
+identifier: Publisher.Package # Microsoft.Excel
 ```
 
 ### Version (version)
-  - Required: ❌
+
+- Required: ❌ (defaults to tag, excluding `v` prefix: `v1.0.0` -> `1.0.0`)
 
 The `PackageVersion` of the package you want to release.
-  
+
 ```yaml
 version: '1.2.3'
 ```
 
 ### Installers Regex (installers-regex)
-  - Required: ❌
+
+- Required: ❌ (Default value: `.(exe|msi|msix|appx)(bundle){0,1}$`)
+
+A regular expression to match the installers from the release artifacts which are to be published to Windows Package Manager (WinGet).
 
 ```yaml
 installers-regex: '\.exe$'
-```
-
-Common Regular Expressions:
-```yaml
-'\.msi$' # All MSI's
-'\.exe$' # All EXE's
-'\.(exe|msi)' # All EXE's and MSI's
+# Some common regular expressions include:
+## '\.msi$'      -> All MSI's
+## '\.exe$'      -> All EXE's
+## '\.(exe|msi)' -> All EXE's and MSI's
+## '\.zip$'      -> All ZIP's
 ```
 
 ### Delete Previous Version (delete-previous-version)
-  - Required: ❌
+
+- Required: ❌ (Default value: `'false'`)
 
 Set this to true if you want to overwrite the previous version of the package with the latest version.
 
 ```yaml
-delete-previous-version: 'true'
+delete-previous-version: 'true' # don't forget to quotes
 ```
 
 ### Release tag (release-tag)
-  - Required: ❌ (Defaults to the GitHub release tag name)
 
-This is the release tag to be used for creating the manifest.
+- Required: ❌ (Default value: `${{ github.release.tag_name || github.ref }}`)
+
+The GitHub release tag of the release you want to publish to Windows Package Manager (WinGet).
 
 ```yaml
-release-tag: 3.2.1
+release-tag: ${{ github.event.inputs.version }} # workflow_dispatch input `version`
 ```
 
 ### Token (token)
-  - Required: ✅
 
-This is the GitHub token with which the action will authenticate with GitHub and create a pull request on the winget-pkgs repository.
+- Required: ✅
+
+The GitHub token with which the action will authenticate with GitHub API and create a pull request on the [microsoft/winget-pkgs][winget-pkgs-repo] repository.
 
 ```yaml
-token: ${{ secrets.WINGET_TOKEN }} # Repository secret called 'WINGET_TOKEN`
+token: ${{ secrets.WINGET_TOKEN }} # Repository secret called 'WINGET_TOKEN'
 ```
 
 #### The token should have the `public_repo` scope.
 
-> **Caution** Do **not** directly put the token in the action. Instead, create a repository secret containing the token and use that in the workflow. See [using encrypted secrets in a workflow](https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow) for more details.
+> **Note** Do **not** directly put the token in the action. Instead, create a repository secret containing the token and use that in the workflow. See [using encrypted secrets in a workflow][gh-encrypted-secrets] for more details.
 
 ### Use fork under which user (fork-user)
-  - Required: ❌ (Defaults to the GitHub repository owner)
 
-This is the GitHub username of the user where the fork of [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs) is present.
+- Required: ❌ (Default value: `${{ github.repository_owner }} # repository owner`)
+
+This is the GitHub username of the user where the fork of [microsoft/winget-pkgs][winget-pkgs-repo] is present. This fork will be used to create the pull request.
 
 ```yaml
-fork-user: JohnDoe123
+fork-user: dotnet-winget-bot # for example purposes only
 ```
-## Roadmap
-
-See the [open issues](https://github.com/vedantmgoyal2009/winget-releaser/issues) for a list of proposed features (and known issues).
 
 ## Contributors ✨
 
@@ -147,3 +231,14 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+[playground-dry-run-badge]: https://img.shields.io/badge/Playground_(dry--run)-bittu.eu.org%2Fdocs%2Fwr--playground-abcdef?logo=windowsterminal
+[playground-dry-run]: https://bittu.eu.org/docs/wr-playground
+[github-all-contributors-badge]: https://img.shields.io/github/all-contributors/vedantmgoyal2009/winget-releaser/main?logo=opensourceinitiative&logoColor=white
+[github-issues-badge]: https://img.shields.io/github/issues/vedantmgoyal2009/winget-releaser?logo=target
+[github-release-badge]: https://img.shields.io/github/v/release/vedantmgoyal2009/winget-releaser?logo=github
+[github-repo-stars-badge]: https://img.shields.io/github/stars/vedantmgoyal2009/winget-releaser?logo=githubsponsors
+[github-license-badge]: https://img.shields.io/github/license/vedantmgoyal2009/winget-releaser?logo=gnu
+[pr-screenshot-image]: https://user-images.githubusercontent.com/74878137/189383287-a873af57-08cd-4154-9848-a7c661af784c.png
+[winget-pkgs-repo]: https://github.com/microsoft/winget-pkgs
+[gh-encrypted-secrets]: https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow

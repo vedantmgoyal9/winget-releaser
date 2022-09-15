@@ -2,8 +2,9 @@
   "name": "winget-releaser",
   "version": "1.0.0",
   "description": "Publish new releases of your application to Windows Package Manager easily.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "npx ncc build index.js --license licenses.txt",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
