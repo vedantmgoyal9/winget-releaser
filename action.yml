@@ -15,6 +15,9 @@ inputs:
     required: true
     description: Whether to delete the last version.
     default: 'false'
+  release-repository:
+    required: false
+    description: The release repository where are located the assets.
   release-tag:
     required: true
     description: The release tag to be used for creating manifests.
