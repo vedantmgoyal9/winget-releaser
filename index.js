@@ -14,6 +14,7 @@ const { resolve } = require('path');
   const pkgid = getInput('identifier');
   const version = getInput('version');
   const instRegex = getInput('installers-regex');
+  const releaseRepository = getInput('release-repository');
   const releaseTag = getInput('release-tag');
   const delPrevVersion = getBooleanInput('delete-previous-version');
   const token = getInput('token');
@@ -24,7 +25,7 @@ const { resolve } = require('path');
     ...(
       await getOctokit(token).rest.repos.getReleaseByTag({
         owner: context.repo.owner,
-        repo: context.repo.repo,
+        repo: releaseRepository,
         tag: releaseTag.replace('refs/tags/', ''),
       })
     ).data,
