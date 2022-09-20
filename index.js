@@ -25,7 +25,7 @@ const { resolve } = require('path');
     ...(
       await getOctokit(token).rest.repos.getReleaseByTag({
         owner: context.repo.owner,
-        repo: releaseRepository || context.repo.repo,
+        repo: releaseRepository,
         tag: releaseTag.replace('refs/tags/', ''),
       })
     ).data,
