@@ -9700,7 +9700,7 @@ const { resolve } = __nccwpck_require__(1017);
       await getOctokit(token).rest.repos.getReleaseByTag({
         owner: context.repo.owner,
         repo: releaseRepository,
-        tag: releaseTag.replace('refs/tags/', ''),
+        tag: releaseTag,
       })
     ).data,
   };
@@ -9714,6 +9714,12 @@ const { resolve } = __nccwpck_require__(1017);
     `Install-Module -Name powershell-yaml -Repository PSGallery -Scope CurrentUser -Force`,
     { shell: 'pwsh', stdio: 'inherit' }
   );
+  // remove winget-pkgs directory if it exists, in case the action is run multiple times for
+  // publishing multiple packages in the same workflow
+  execSync(
+    `Remove-Item -Path .\\winget-pkgs\\ -Recurse -Force -ErrorAction SilentlyContinue`,
+    { shell: 'pwsh', stdio: 'inherit' }
+  );
   execSync(
     `git clone https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git`,
     {
@@ -9721,11 +9727,11 @@ const { resolve } = __nccwpck_require__(1017);
     }
   );
   execSync(
-    `git -C winget-pkgs config --local user.name ${context.payload.sender.login}`,
+    `git -C winget-pkgs config --local user.name github-actions`,
     { stdio: 'inherit' }
   );
   execSync(
-    `git -C winget-pkgs config --local user.email ${context.payload.sender.id}+${context.payload.sender.login}@users.noreply.github.com`,
+    `git -C winget-pkgs config --local user.email 41898282+github-actions[bot]@users.noreply.github.com`,
     { stdio: 'inherit' }
   );
   execSync(`git -C winget-pkgs remote rename origin upstream`, {
@@ -9760,7 +9766,7 @@ const { resolve } = __nccwpck_require__(1017);
   const inputObject = JSON.stringify({
     PackageIdentifier: pkgid,
     PackageVersion:
-      version || new RegExp(/[0-9.]+/g).exec(releaseInfo.tag_name)[0],
+      version || new RegExp(/(?<=v).*/g).exec(releaseInfo.tag_name)[0],
     InstallerUrls: releaseInfo.assets
       .filter((asset) => {
         return new RegExp(instRegex, 'g').test(asset.name);
