@@ -16,13 +16,15 @@ inputs:
     description: Whether to delete the last version.
     default: 'false'
   release-repository:
-    required: true
+    required: false # true
     description: The repository where the release is present (should be present under same user/organization).
-    default: ${{ github.event.repository.name }}
+    # since `schedule` event doesn't have any event payload,
+    # we need to get current repository name from `context.repo.repo` in index.js
+    # default: ${{ github.event.repository.name }}
   release-tag:
     required: true
     description: The release tag to be used for creating manifests.
-    default: ${{ github.release.tag_name || github.ref }}
+    default: ${{ github.release.tag_name || github.ref_name }}
   token:
     required: true
     description: GitHub token to create pull request on Windows Package Manager Community Repository.

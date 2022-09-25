@@ -9699,8 +9699,8 @@ const { resolve } = __nccwpck_require__(1017);
     ...(
       await getOctokit(token).rest.repos.getReleaseByTag({
         owner: context.repo.owner,
-        repo: releaseRepository,
-        tag: releaseTag.replace('refs/tags/', ''),
+        repo: releaseRepository || context.repo.repo,
+        tag: releaseTag,
       })
     ).data,
   };
@@ -9714,18 +9714,21 @@ const { resolve } = __nccwpck_require__(1017);
     `Install-Module -Name powershell-yaml -Repository PSGallery -Scope CurrentUser -Force`,
     { shell: 'pwsh', stdio: 'inherit' }
   );
+  // remove winget-pkgs directory if it exists, in case the action is run multiple times for
+  // publishing multiple packages in the same workflow
+  execSync(
+    `Remove-Item -Path .\\winget-pkgs\\ -Recurse -Force -ErrorAction Ignore`,
+    { shell: 'pwsh', stdio: 'inherit' }
+  );
   execSync(
     `git clone https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git`,
-    {
-      stdio: 'inherit',
-    }
-  );
-  execSync(
-    `git -C winget-pkgs config --local user.name ${context.payload.sender.login}`,
     { stdio: 'inherit' }
   );
+  execSync(`git -C winget-pkgs config --local user.name github-actions`, {
+    stdio: 'inherit',
+  });
   execSync(
-    `git -C winget-pkgs config --local user.email ${context.payload.sender.id}+${context.payload.sender.login}@users.noreply.github.com`,
+    `git -C winget-pkgs config --local user.email 41898282+github-actions[bot]@users.noreply.github.com`,
     { stdio: 'inherit' }
   );
   execSync(`git -C winget-pkgs remote rename origin upstream`, {
@@ -9736,8 +9739,7 @@ const { resolve } = __nccwpck_require__(1017);
     { stdio: 'inherit' }
   );
   execSync(
-    // NOTE: replace latest with main, while testing the action after modifying yamlcreate.ps1
-    `Invoke-WebRequest -Uri https://github.com/vedantmgoyal2009/winget-releaser/raw/latest/YamlCreate.ps1 -OutFile .\\winget-pkgs\\Tools\\YamlCreate.ps1`,
+    `Invoke-WebRequest -Uri https://github.com/vedantmgoyal2009/winget-releaser/raw/${process.env.GITHUB_ACTION_REF}/YamlCreate.ps1 -OutFile .\\winget-pkgs\\Tools\\YamlCreate.ps1`,
     { shell: 'pwsh', stdio: 'inherit' }
   );
   execSync(`git -C winget-pkgs commit --all -m \"Update YamlCreate.ps1\"`, {
@@ -9760,7 +9762,7 @@ const { resolve } = __nccwpck_require__(1017);
   const inputObject = JSON.stringify({
     PackageIdentifier: pkgid,
     PackageVersion:
-      version || new RegExp(/[0-9.]+/g).exec(releaseInfo.tag_name)[0],
+      version || new RegExp(/(?<=v).*/g).exec(releaseInfo.tag_name)[0],
     InstallerUrls: releaseInfo.assets
       .filter((asset) => {
         return new RegExp(instRegex, 'g').test(asset.name);
