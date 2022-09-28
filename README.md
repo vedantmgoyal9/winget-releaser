@@ -127,6 +127,8 @@ jobs:
 </td>
 </tr>
 </table>
+  
+3. Ensure your fork is up to date. You can use something like [Pull](https://github.com/apps/pull) to keep it updated regularly.
 
 ## Configuration Options
 
