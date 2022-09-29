@@ -41,7 +41,7 @@ jobs:
     # Action can only be run on windows
     runs-on: windows-latest
     steps:
-      - uses: vedantmgoyal2009/winget-releaser@latest
+      - uses: vedantmgoyal2009/winget-releaser@v1
         with:
           identifier: Package.Identifier
           token: ${{ secrets.WINGET_TOKEN }}
@@ -59,7 +59,7 @@ jobs:
   publish:
     runs-on: windows-latest
     steps:
-      - uses: vedantmgoyal2009/winget-releaser@latest
+      - uses: vedantmgoyal2009/winget-releaser@v1
         with:
           identifier: Package.Identifier
           installers-regex: '\.exe$' # Only .exe files
@@ -85,13 +85,13 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Publish X to WinGet
-        uses: vedantmgoyal2009/winget-releaser@latest
+        uses: vedantmgoyal2009/winget-releaser@v1
         with:
           identifier: Package.Identifier<X>
           installers-regex: '\.exe$' # Only .exe files
           token: ${{ secrets.WINGET_TOKEN }}
       - name: Publish Y to WinGet
-        uses: vedantmgoyal2009/winget-releaser@latest
+        uses: vedantmgoyal2009/winget-releaser@v1
         with:
           identifier: Package.Identifier<Y>
           installers-regex: '\.msi$' # Only .msi files
@@ -117,7 +117,7 @@ jobs:
           $VERSION="${{ github.event.release.name }}" -replace '^.*/ '
           echo "::set-output name=version::$VERSION"
         shell: pwsh
-      - uses: vedantmgoyal2009/winget-releaser@latest
+      - uses: vedantmgoyal2009/winget-releaser@v1
         with:
           identifier: Package.Identifier
           version: ${{ steps.get-version.outputs.version }}
