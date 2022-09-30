@@ -9793,7 +9793,7 @@ const { resolve } = __nccwpck_require__(1017);
     info(`Latest version found: ${latestVersion}`);
 
     // if the latest version is greater than the current version, then update the action
-    if (latestVersion > currentVersion) {
+    if (latestVersion > process.env.GITHUB_ACTION_REF) {
       execSync(
         `git clone https://x-access-token:${token}@github.com/${process.env.GITHUB_REPOSITORY}.git`,
         {
