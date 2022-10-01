@@ -21,7 +21,7 @@ const { resolve } = require('path');
   const forkUser = getInput('fork-user');
 
   // get only data, and exclude status, url, and headers
-  releaseInfo = {
+  const releaseInfo = {
     ...(
       await getOctokit(token).rest.repos.getReleaseByTag({
         owner: context.repo.owner,
@@ -85,7 +85,7 @@ const { resolve } = require('path');
   const inputObject = JSON.stringify({
     PackageIdentifier: pkgid,
     PackageVersion:
-      version || new RegExp(/(?<=v).*/g).exec(releaseInfo.tag_name)[0],
+      version || new RegExp(/(?<=v).*/g).exec(releaseInfo.tag_name)![0],
     InstallerUrls: releaseInfo.assets
       .filter((asset) => {
         return new RegExp(instRegex, 'g').test(asset.name);
@@ -107,7 +107,7 @@ const { resolve } = require('path');
 
   info(`::group::Checking for action updates...`);
   // check if action version is a version (starts with `v`) and not a pinned commit ref
-  if (/^v\d+$/g.test(process.env.GITHUB_ACTION_REF)) {
+  if (/^v\d+$/g.test(process.env.GITHUB_ACTION_REF!)) {
     const latestVersion = (
       await getOctokit(token).rest.repos.getLatestRelease({
         owner: 'vedantmgoyal2009',
@@ -119,7 +119,7 @@ const { resolve } = require('path');
     info(`Latest version found: ${latestVersion}`);
 
     // if the latest version is greater than the current version, then update the action
-    if (latestVersion > process.env.GITHUB_ACTION_REF) {
+    if (latestVersion > process.env.GITHUB_ACTION_REF!) {
       execSync(
         `git clone https://x-access-token:${token}@github.com/${process.env.GITHUB_REPOSITORY}.git`,
         {
@@ -128,11 +128,11 @@ const { resolve } = require('path');
       );
       execSync(`git config --local user.name github-actions`, {
         stdio: 'inherit',
-        cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
+        cwd: process.env.GITHUB_REPOSITORY!.split('/')[1],
       });
       execSync(
         `git config --local user.email 41898282+github-actions[bot]@users.noreply.github.com`,
-        { stdio: 'inherit', cwd: process.env.GITHUB_REPOSITORY.split('/')[1] }
+        { stdio: 'inherit', cwd: process.env.GITHUB_REPOSITORY!.split('/')[1] }
       );
       // replace the version in the workflow file using `find` and `sed`
       execSync(
@@ -140,7 +140,7 @@ const { resolve } = require('path');
         {
           stdio: 'inherit',
           cwd: `${
-            process.env.GITHUB_REPOSITORY.split('/')[1]
+            process.env.GITHUB_REPOSITORY!.split('/')[1]
           }/.github/workflows`,
           shell: 'bash',
         }
@@ -150,30 +150,30 @@ const { resolve } = require('path');
         `git commit --all -m \"ci(winget-releaser): update action from ${process.env.GITHUB_ACTION_REF} to ${latestVersion}\"`,
         {
           stdio: 'inherit',
-          cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
+          cwd: process.env.GITHUB_REPOSITORY!.split('/')[1],
         }
       );
       execSync(`git switch -c winget-releaser/update-to-${latestVersion}`, {
         stdio: 'inherit',
-        cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
+        cwd: process.env.GITHUB_REPOSITORY!.split('/')[1],
       });
       execSync(
         `git push --force-with-lease --set-upstream origin winget-releaser/update-to-${latestVersion}`,
         {
           stdio: 'inherit',
-          cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
+          cwd: process.env.GITHUB_REPOSITORY!.split('/')[1],
         }
       );
       execSync(
         `@\"
-This PR was automatically created by the [WinGet Releaser GitHub Action](https://github.com/vedantmgoyal2009/winget-releaser) to update the action version from \`${process.env.GITHUB_ACTION_REF}\` to \`${newVersion}\`.\`r\`n
+This PR was automatically created by the [WinGet Releaser GitHub Action](https://github.com/vedantmgoyal2009/winget-releaser) to update the action version from \`${process.env.GITHUB_ACTION_REF}\` to \`${latestVersion}\`.\`r\`n
 The auto-update function help maintainers keep their workflows up-to-date with the latest version of the action.\`r\`n
 You can close this pull request if you don't want to update the action version.\`r\`n
 Mentioning @vedantmgoyal2009 for a second pair of eyes, in case any breaking changes have been introduced in the new version of the action.
 \"@ | gh pr create --fill --body-file -`,
         {
           stdio: 'inherit',
-          cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
+          cwd: process.env.GITHUB_REPOSITORY!.split('/')[1],
           shell: 'pwsh',
           env: { ...process.env, GH_TOKEN: token }, // set GH_TOKEN env variable for GitHub CLI (gh)
         }
