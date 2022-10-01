@@ -21,7 +21,10 @@ WinGet Releaser allows you to automate this process, with pull requests that are
 
 <img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pat-scope.png" />
 
-2. Fork the [winget-pkgs][winget-pkgs-repo] repository under the same account/organization as your repository on which you want to use this action.
+2. Fork the [winget-pkgs][winget-pkgs-repo] repository under the same account/organization as your repository on which you want to use this action. Ensure that the fork is up-to-date with the upstream repository. You can do this using one of the following methods:
+
+- Give `workflow` permission to the token you created in Step 1. This will allow the action to automatically update your fork with the upstream repository.
+- You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date with the upstream repository via automated pull requests.
 
 <table>
 <tr>
@@ -127,8 +130,6 @@ jobs:
 </td>
 </tr>
 </table>
-  
-3. Ensure your fork is up to date. You can use something like [Pull](https://github.com/apps/pull) to keep it updated regularly.
 
 ## Configuration Options
 
@@ -249,6 +250,7 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 [github-release-badge]: https://img.shields.io/github/v/release/vedantmgoyal2009/winget-releaser?logo=github
 [github-repo-stars-badge]: https://img.shields.io/github/stars/vedantmgoyal2009/winget-releaser?logo=githubsponsors
 [github-license-badge]: https://img.shields.io/github/license/vedantmgoyal2009/winget-releaser?logo=gnu
-[pr-screenshot-image]: https://user-images.githubusercontent.com/74878137/189383287-a873af57-08cd-4154-9848-a7c661af784c.png
+[pr-screenshot-image]: https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-request-by-action-example.png
 [winget-pkgs-repo]: https://github.com/microsoft/winget-pkgs
+[pull-app-auto-update-forks]: https://github.com/wei/pull
 [gh-encrypted-secrets]: https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow
