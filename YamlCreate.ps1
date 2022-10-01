@@ -1061,7 +1061,7 @@ if ($LASTEXITCODE -eq '0') {
     git commit -m "$CommitType`: $PackageIdentifier version $PackageVersion" --quiet
     git switch -c "$BranchName" --quiet
     git push --set-upstream origin "$BranchName" --quiet
-    gh pr create -f --body '### Pull request has been automatically created using 🛫 [WinGet Releaser](https://bittu.eu.org/docs/wr-intro).'
+    gh pr create -f --body '### Pull request has been automatically created using 🛫 [WinGet Releaser](https://github.com/vedantmgoyal2009/winget-releaser).'
 }
 
 # Error levels for the ReturnValue class
