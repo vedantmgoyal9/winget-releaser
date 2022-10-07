@@ -22,7 +22,7 @@ inputs:
   release-tag:
     required: true
     description: The release tag to be used for creating manifests.
-    default: ${{ github.release.tag_name || github.ref_name }}
+    default: ${{ github.event.release.tag_name || github.ref_name }}
   token:
     required: true
     description: GitHub token to create pull request on Windows Package Manager Community Repository.
