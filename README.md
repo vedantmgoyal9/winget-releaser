@@ -180,7 +180,7 @@ delete-previous-version: 'true' # don't forget to quotes
 
 ### Release tag (release-tag)
 
-- Required: ❌ (Default value: `${{ github.release.tag_name || github.ref }}`)
+- Required: ❌ (Default value: `${{ github.event.release.tag_name || github.ref }}`)
 
 The GitHub release tag of the release you want to publish to Windows Package Manager (WinGet).
 
