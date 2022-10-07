@@ -185,7 +185,7 @@ delete-previous-version: 'true' # don't forget to quotes
 The GitHub release tag of the release you want to publish to Windows Package Manager (WinGet).
 
 ```yaml
-release-tag: ${{ github.event.inputs.version }} # workflow_dispatch input `version`
+release-tag: ${{ inputs.version }} # workflow_dispatch input `version`
 ```
 
 ### Token (token)
