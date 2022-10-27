@@ -26,6 +26,15 @@ WinGet Releaser allows you to automate this process, with pull requests that are
 - Give `workflow` permission to the token you created in Step 1. This will allow the action to automatically update your fork with the upstream repository.
 - You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date with the upstream repository via automated pull requests.
 
+## Usage
+
+- Typically, the right time to publish to WinGet is when a GitHub release is published, or a pre-release is changed to a release. 
+  Depending on your pipeline, this final publishing step may be automated or manual. 
+  
+  A very simple way to use WinGet-Releaser that works in both scenarios is to **create a new workflow** that triggers on the [`release` event](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release) with [`released` Activity Type](https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#release).
+  
+- Please note that releases in draft or unpublished status can't (and shouldn't) be submitted to WinGet, simply because their binaries are not available for general download. 
+
 <table>
 <tr>
 <th align="center"> Workflow with the minimal configuration </th>
