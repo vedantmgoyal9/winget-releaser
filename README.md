@@ -28,6 +28,8 @@ WinGet Releaser allows you to automate this process, with pull requests that are
 
 ## Usage ⚒️
 
+- A very simple to **test** the action is to create a **_new_** workflow that triggers on the [`release`][gh-release-event-docs] event with [`released`][gh-release-event-types-docs] event type. It triggers when a release is published, or a pre-release is changed to a release.
+
 - Please note that releases in draft or unpublished status can't (and shouldn't) be submitted to WinGet, simply because their binaries are not available for general download.
 
 <table>
@@ -257,4 +259,6 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 [pr-screenshot-image]: https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-request-by-action-example.png
 [winget-pkgs-repo]: https://github.com/microsoft/winget-pkgs
 [pull-app-auto-update-forks]: https://github.com/wei/pull
+[gh-release-event-docs]: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release
+[gh-release-event-types-docs]: https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#release
 [gh-encrypted-secrets]: https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow
