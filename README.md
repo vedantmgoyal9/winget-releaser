@@ -150,7 +150,7 @@ identifier: Publisher.Package # Microsoft.Excel
 The `PackageVersion` of the package you want to release.
 
 ```yaml
-version: '1.2.3'
+version: ${{ github.event.release.tag_name }} # For tags without the 'v' prefix
 ```
 
 ### Installers Regex (installers-regex)
