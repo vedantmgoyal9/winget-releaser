@@ -1174,7 +1174,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getOctokitOptions = exports.GitHub = exports.context = void 0;
+exports.getOctokitOptions = exports.GitHub = exports.defaults = exports.context = void 0;
 const Context = __importStar(__nccwpck_require__(4087));
 const Utils = __importStar(__nccwpck_require__(7914));
 // octokit + plugins
@@ -1183,13 +1183,13 @@ const plugin_rest_endpoint_methods_1 = __nccwpck_require__(3044);
 const plugin_paginate_rest_1 = __nccwpck_require__(4193);
 exports.context = new Context.Context();
 const baseUrl = Utils.getApiBaseUrl();
-const defaults = {
+exports.defaults = {
     baseUrl,
     request: {
         agent: Utils.getProxyAgent(baseUrl)
     }
 };
-exports.GitHub = core_1.Octokit.plugin(plugin_rest_endpoint_methods_1.restEndpointMethods, plugin_paginate_rest_1.paginateRest).defaults(defaults);
+exports.GitHub = core_1.Octokit.plugin(plugin_rest_endpoint_methods_1.restEndpointMethods, plugin_paginate_rest_1.paginateRest).defaults(exports.defaults);
 /**
  * Convience function to correctly format Octokit Options to pass into the constructor.
  *
@@ -4347,63 +4347,67 @@ exports.request = request;
 /***/ 3682:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var register = __nccwpck_require__(4670)
-var addHook = __nccwpck_require__(5549)
-var removeHook = __nccwpck_require__(6819)
+var register = __nccwpck_require__(4670);
+var addHook = __nccwpck_require__(5549);
+var removeHook = __nccwpck_require__(6819);
 
 // bind with array of arguments: https://stackoverflow.com/a/21792913
-var bind = Function.bind
-var bindable = bind.bind(bind)
+var bind = Function.bind;
+var bindable = bind.bind(bind);
 
-function bindApi (hook, state, name) {
-  var removeHookRef = bindable(removeHook, null).apply(null, name ? [state, name] : [state])
-  hook.api = { remove: removeHookRef }
-  hook.remove = removeHookRef
-
-  ;['before', 'error', 'after', 'wrap'].forEach(function (kind) {
-    var args = name ? [state, kind, name] : [state, kind]
-    hook[kind] = hook.api[kind] = bindable(addHook, null).apply(null, args)
-  })
+function bindApi(hook, state, name) {
+  var removeHookRef = bindable(removeHook, null).apply(
+    null,
+    name ? [state, name] : [state]
+  );
+  hook.api = { remove: removeHookRef };
+  hook.remove = removeHookRef;
+  ["before", "error", "after", "wrap"].forEach(function (kind) {
+    var args = name ? [state, kind, name] : [state, kind];
+    hook[kind] = hook.api[kind] = bindable(addHook, null).apply(null, args);
+  });
 }
 
-function HookSingular () {
-  var singularHookName = 'h'
+function HookSingular() {
+  var singularHookName = "h";
   var singularHookState = {
-    registry: {}
-  }
-  var singularHook = register.bind(null, singularHookState, singularHookName)
-  bindApi(singularHook, singularHookState, singularHookName)
-  return singularHook
+    registry: {},
+  };
+  var singularHook = register.bind(null, singularHookState, singularHookName);
+  bindApi(singularHook, singularHookState, singularHookName);
+  return singularHook;
 }
 
-function HookCollection () {
+function HookCollection() {
   var state = {
-    registry: {}
-  }
+    registry: {},
+  };
 
-  var hook = register.bind(null, state)
-  bindApi(hook, state)
+  var hook = register.bind(null, state);
+  bindApi(hook, state);
 
-  return hook
+  return hook;
 }
 
-var collectionHookDeprecationMessageDisplayed = false
-function Hook () {
+var collectionHookDeprecationMessageDisplayed = false;
+function Hook() {
   if (!collectionHookDeprecationMessageDisplayed) {
-    console.warn('[before-after-hook]: "Hook()" repurposing warning, use "Hook.Collection()". Read more: https://git.io/upgrade-before-after-hook-to-1.4')
-    collectionHookDeprecationMessageDisplayed = true
+    console.warn(
+      '[before-after-hook]: "Hook()" repurposing warning, use "Hook.Collection()". Read more: https://git.io/upgrade-before-after-hook-to-1.4'
+    );
+    collectionHookDeprecationMessageDisplayed = true;
   }
-  return HookCollection()
+  return HookCollection();
 }
 
-Hook.Singular = HookSingular.bind()
-Hook.Collection = HookCollection.bind()
+Hook.Singular = HookSingular.bind();
+Hook.Collection = HookCollection.bind();
 
-module.exports = Hook
+module.exports = Hook;
 // expose constructors as a named property for TypeScript
-module.exports.Hook = Hook
-module.exports.Singular = Hook.Singular
-module.exports.Collection = Hook.Collection
+module.exports.Hook = Hook;
+module.exports.Singular = Hook.Singular;
+module.exports.Collection = Hook.Collection;
 
 
 /***/ }),
@@ -9686,197 +9690,144 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
 (() => {
-const { getInput, info, getBooleanInput, error } = __nccwpck_require__(2186);
-const { context, getOctokit } = __nccwpck_require__(5438);
-const { execSync } = __nccwpck_require__(2081);
-const { resolve } = __nccwpck_require__(1017);
+"use strict";
+var exports = __webpack_exports__;
 
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core_1 = __nccwpck_require__(2186);
+const github_1 = __nccwpck_require__(5438);
+const child_process_1 = __nccwpck_require__(2081);
+const path_1 = __nccwpck_require__(1017);
 (async () => {
-  // check if the runner operating system is windows
-  if (process.platform != 'win32') {
-    error('This action only works on Windows.');
-    process.exit(1);
-  }
-
-  // get the inputs from the action
-  const pkgid = getInput('identifier');
-  const version = getInput('version');
-  const instRegex = getInput('installers-regex');
-  const releaseRepository = getInput('release-repository');
-  const releaseTag = getInput('release-tag');
-  const delPrevVersion = getBooleanInput('delete-previous-version');
-  const token = getInput('token');
-  const forkUser = getInput('fork-user');
-
-  // get only data, and exclude status, url, and headers
-  releaseInfo = {
-    ...(
-      await getOctokit(token).rest.repos.getReleaseByTag({
-        owner: context.repo.owner,
-        // https://github.blog/changelog/2022-09-27-github-actions-additional-information-available-in-github-event-payload-for-scheduled-workflow-runs
-        repo: releaseRepository, // || context.repo.repo,
-        tag: releaseTag,
-      })
-    ).data,
-  };
-
-  // install powershell-yaml, clone winget-pkgs repo and configure remotes, update yamlcreate, and
-  // download wingetdev from vedantmgoyal2009/vedantmgoyal2009 (winget-pkgs-automation)
-  info(
-    `::group::Install powershell-yaml, clone winget-pkgs and configure remotes, update YamlCreate, download wingetdev...`
-  );
-  execSync(
-    `Install-Module -Name powershell-yaml -Repository PSGallery -Scope CurrentUser -Force`,
-    { shell: 'pwsh', stdio: 'inherit' }
-  );
-  // remove winget-pkgs directory if it exists, in case the action is run multiple times for
-  // publishing multiple packages in the same workflow
-  execSync(
-    `If (Test-Path -Path .\\winget-pkgs\\) { Remove-Item -Path .\\winget-pkgs\\ -Recurse -Force -ErrorAction SilentlyContinue }`,
-    { shell: 'pwsh', stdio: 'inherit' }
-  );
-  execSync(
-    `git clone https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git`,
-    { stdio: 'inherit' }
-  );
-  execSync(`git -C winget-pkgs config --local user.name github-actions`, {
-    stdio: 'inherit',
-  });
-  execSync(
-    `git -C winget-pkgs config --local user.email 41898282+github-actions[bot]@users.noreply.github.com`,
-    { stdio: 'inherit' }
-  );
-  execSync(`git -C winget-pkgs remote rename origin upstream`, {
-    stdio: 'inherit',
-  });
-  execSync(
-    `git -C winget-pkgs remote add origin https://github.com/${forkUser}/winget-pkgs.git`,
-    { stdio: 'inherit' }
-  );
-  execSync(
-    `Invoke-WebRequest -Uri https://github.com/vedantmgoyal2009/winget-releaser/raw/${process.env.GITHUB_ACTION_REF}/YamlCreate.ps1 -OutFile .\\winget-pkgs\\Tools\\YamlCreate.ps1`,
-    { shell: 'pwsh', stdio: 'inherit' }
-  );
-  execSync(`git -C winget-pkgs commit --all -m \"Update YamlCreate.ps1\"`, {
-    stdio: 'inherit',
-  });
-  execSync(
-    `svn checkout https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/tools/wingetdev`,
-    { stdio: 'inherit' }
-  );
-  info(`::endgroup::`);
-
-  // resolve wingetdev path (./wingetdev/wingetdev.exe)
-  process.env.WINGETDEV = resolve('wingetdev', 'wingetdev.exe');
-
-  info(`::group::Update manifests and create pull request`);
-  const inputObject = JSON.stringify({
-    PackageIdentifier: pkgid,
-    PackageVersion:
-      version || new RegExp(/(?<=v).*/g).exec(releaseInfo.tag_name)[0],
-    InstallerUrls: releaseInfo.assets
-      .filter((asset) => {
-        return new RegExp(instRegex, 'g').test(asset.name);
-      })
-      .map((asset) => {
-        return asset.browser_download_url;
-      }),
-    ReleaseNotesUrl: releaseInfo.html_url,
-    ReleaseDate: new Date(releaseInfo.published_at).toISOString().slice(0, 10),
-    DeletePreviousVersion: delPrevVersion,
-  });
-  execSync(`.\\YamlCreate.ps1 \'${inputObject}\'`, {
-    cwd: 'winget-pkgs/Tools',
-    shell: 'pwsh',
-    stdio: 'inherit',
-    env: { ...process.env, GH_TOKEN: token }, // set GH_TOKEN env variable for GitHub CLI (gh)
-  });
-  info(`::endgroup::`);
-
-  info(`::group::Checking for action updates...`);
-  // check if action version is a version (starts with `v`) and not a pinned commit ref
-  if (/^v\d+$/g.test(process.env.GITHUB_ACTION_REF)) {
-    const latestVersion = (
-      await getOctokit(token).rest.repos.getLatestRelease({
-        owner: 'vedantmgoyal2009',
-        repo: 'winget-releaser',
-      })
-    ).data.tag_name;
-
-    info(`Current action version: ${process.env.GITHUB_ACTION_REF}`);
-    info(`Latest version found: ${latestVersion}`);
-
-    // if the latest version is greater than the current version, then update the action
-    if (latestVersion > process.env.GITHUB_ACTION_REF) {
-      execSync(
-        `git clone https://x-access-token:${token}@github.com/${process.env.GITHUB_REPOSITORY}.git`,
-        {
-          stdio: 'inherit',
-        }
-      );
-      execSync(`git config --local user.name github-actions`, {
+    // check if the runner operating system is windows
+    if (process.platform !== 'win32') {
+        (0, core_1.error)('This action only works on Windows.');
+        process.exit(1);
+    }
+    // get the inputs from the action
+    const pkgid = (0, core_1.getInput)('identifier');
+    const version = (0, core_1.getInput)('version');
+    const instRegex = (0, core_1.getInput)('installers-regex');
+    const releaseRepository = (0, core_1.getInput)('release-repository');
+    const releaseTag = (0, core_1.getInput)('release-tag');
+    const delPrevVersion = (0, core_1.getBooleanInput)('delete-previous-version');
+    const token = (0, core_1.getInput)('token');
+    const forkUser = (0, core_1.getInput)('fork-user');
+    // get only data, and exclude status, url, and headers
+    const releaseInfo = {
+        ...(await (0, github_1.getOctokit)(token).rest.repos.getReleaseByTag({
+            owner: github_1.context.repo.owner,
+            // https://github.blog/changelog/2022-09-27-github-actions-additional-information-available-in-github-event-payload-for-scheduled-workflow-runs
+            repo: releaseRepository,
+            tag: releaseTag,
+        })).data,
+    };
+    // install powershell-yaml, clone winget-pkgs repo and configure remotes, update yamlcreate, and
+    // download wingetdev from vedantmgoyal2009/vedantmgoyal2009 (winget-pkgs-automation)
+    (0, core_1.info)(`::group::Install powershell-yaml, clone winget-pkgs and configure remotes, update YamlCreate, download wingetdev...`);
+    (0, child_process_1.execSync)(`Install-Module -Name powershell-yaml -Repository PSGallery -Scope CurrentUser -Force`, { shell: 'pwsh', stdio: 'inherit' });
+    // remove winget-pkgs directory if it exists, in case the action is run multiple times for
+    // publishing multiple packages in the same workflow
+    (0, child_process_1.execSync)(`If (Test-Path -Path .\\winget-pkgs\\) { Remove-Item -Path .\\winget-pkgs\\ -Recurse -Force -ErrorAction SilentlyContinue }`, { shell: 'pwsh', stdio: 'inherit' });
+    (0, child_process_1.execSync)(`git clone https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git`, { stdio: 'inherit' });
+    (0, child_process_1.execSync)(`git -C winget-pkgs config --local user.name github-actions`, {
         stdio: 'inherit',
-        cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
-      });
-      execSync(
-        `git config --local user.email 41898282+github-actions[bot]@users.noreply.github.com`,
-        { stdio: 'inherit', cwd: process.env.GITHUB_REPOSITORY.split('/')[1] }
-      );
-      // replace the version in the workflow file using `find` and `sed`
-      execSync(
-        `find -name '*.yml' -or -name '*.yaml' -exec sed -i 's/vedantmgoyal2009\\/winget-releaser@${process.env.GITHUB_ACTION_REF}/vedantmgoyal2009\\/winget-releaser@${latestVersion}/g' {} +`,
-        {
-          stdio: 'inherit',
-          cwd: `${
-            process.env.GITHUB_REPOSITORY.split('/')[1]
-          }/.github/workflows`,
-          shell: 'bash',
-        }
-      );
-      // create a new branch, commit and push the changes, and create a pull request
-      execSync(
-        `git commit --all -m \"ci(winget-releaser): update action from ${process.env.GITHUB_ACTION_REF} to ${latestVersion}\"`,
-        {
-          stdio: 'inherit',
-          cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
-        }
-      );
-      execSync(`git switch -c winget-releaser/update-to-${latestVersion}`, {
+    });
+    (0, child_process_1.execSync)(`git -C winget-pkgs config --local user.email 41898282+github-actions[bot]@users.noreply.github.com`, { stdio: 'inherit' });
+    (0, child_process_1.execSync)(`git -C winget-pkgs remote rename origin upstream`, {
         stdio: 'inherit',
-        cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
-      });
-      execSync(
-        `git push --force-with-lease --set-upstream origin winget-releaser/update-to-${latestVersion}`,
-        {
-          stdio: 'inherit',
-          cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
-        }
-      );
-      execSync(
-        `@\"
-This PR was automatically created by the [WinGet Releaser GitHub Action](https://github.com/vedantmgoyal2009/winget-releaser) to update the action version from \`${process.env.GITHUB_ACTION_REF}\` to \`${newVersion}\`.\`r\`n
+    });
+    (0, child_process_1.execSync)(`git -C winget-pkgs remote add origin https://github.com/${forkUser}/winget-pkgs.git`, { stdio: 'inherit' });
+    (0, child_process_1.execSync)(`Invoke-WebRequest -Uri https://github.com/vedantmgoyal2009/winget-releaser/raw/${process.env.GITHUB_ACTION_REF}/src/YamlCreate.ps1 -OutFile .\\winget-pkgs\\Tools\\YamlCreate.ps1`, { shell: 'pwsh', stdio: 'inherit' });
+    (0, child_process_1.execSync)(`git -C winget-pkgs commit --all -m \"Update YamlCreate.ps1\"`, {
+        stdio: 'inherit',
+    });
+    (0, child_process_1.execSync)(`svn checkout https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/tools/wingetdev`, { stdio: 'inherit' });
+    (0, core_1.info)(`::endgroup::`);
+    // resolve wingetdev path (./wingetdev/wingetdev.exe)
+    process.env.WINGETDEV = (0, path_1.resolve)('wingetdev', 'wingetdev.exe');
+    (0, core_1.info)(`::group::Update manifests and create pull request`);
+    const inputObject = JSON.stringify({
+        PackageIdentifier: pkgid,
+        PackageVersion: version || new RegExp(/(?<=v).*/g).exec(releaseInfo.tag_name)[0],
+        InstallerUrls: releaseInfo.assets
+            .filter((asset) => {
+            return new RegExp(instRegex, 'g').test(asset.name);
+        })
+            .map((asset) => {
+            return asset.browser_download_url;
+        }),
+        ReleaseNotesUrl: releaseInfo.html_url,
+        ReleaseDate: new Date(releaseInfo.published_at).toISOString().slice(0, 10),
+        DeletePreviousVersion: delPrevVersion,
+    });
+    (0, child_process_1.execSync)(`.\\YamlCreate.ps1 \'${inputObject}\'`, {
+        cwd: 'winget-pkgs/Tools',
+        shell: 'pwsh',
+        stdio: 'inherit',
+        env: { ...process.env, GH_TOKEN: token }, // set GH_TOKEN env variable for GitHub CLI (gh)
+    });
+    (0, core_1.info)(`::endgroup::`);
+    (0, core_1.info)(`::group::Checking for action updates...`);
+    // check if action version is a version (starts with `v`) and not a pinned commit ref
+    if (/^v\d+$/g.test(process.env.GITHUB_ACTION_REF)) {
+        const latestVersion = (await (0, github_1.getOctokit)(token).rest.repos.getLatestRelease({
+            owner: 'vedantmgoyal2009',
+            repo: 'winget-releaser',
+        })).data.tag_name;
+        (0, core_1.info)(`Current action version: ${process.env.GITHUB_ACTION_REF}`);
+        (0, core_1.info)(`Latest version found: ${latestVersion}`);
+        // if the latest version is greater than the current version, then update the action
+        if (latestVersion > process.env.GITHUB_ACTION_REF) {
+            (0, child_process_1.execSync)(`git clone https://x-access-token:${token}@github.com/${process.env.GITHUB_REPOSITORY}.git`, {
+                stdio: 'inherit',
+            });
+            (0, child_process_1.execSync)(`git config --local user.name github-actions`, {
+                stdio: 'inherit',
+                cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
+            });
+            (0, child_process_1.execSync)(`git config --local user.email 41898282+github-actions[bot]@users.noreply.github.com`, { stdio: 'inherit', cwd: process.env.GITHUB_REPOSITORY.split('/')[1] });
+            // replace the version in the workflow file using `find` and `sed`
+            (0, child_process_1.execSync)(`find -name '*.yml' -or -name '*.yaml' -exec sed -i 's/vedantmgoyal2009\\/winget-releaser@${process.env.GITHUB_ACTION_REF}/vedantmgoyal2009\\/winget-releaser@${latestVersion}/g' {} +`, {
+                stdio: 'inherit',
+                cwd: `${process.env.GITHUB_REPOSITORY.split('/')[1]}/.github/workflows`,
+                shell: 'bash',
+            });
+            // create a new branch, commit and push the changes, and create a pull request
+            (0, child_process_1.execSync)(`git commit --all -m \"ci(winget-releaser): update action from ${process.env.GITHUB_ACTION_REF} to ${latestVersion}\"`, {
+                stdio: 'inherit',
+                cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
+            });
+            (0, child_process_1.execSync)(`git switch -c winget-releaser/update-to-${latestVersion}`, {
+                stdio: 'inherit',
+                cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
+            });
+            (0, child_process_1.execSync)(`git push --force-with-lease --set-upstream origin winget-releaser/update-to-${latestVersion}`, {
+                stdio: 'inherit',
+                cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
+            });
+            (0, child_process_1.execSync)(`@\"
+This PR was automatically created by the [WinGet Releaser GitHub Action](https://github.com/vedantmgoyal2009/winget-releaser) to update the action version from \`${process.env.GITHUB_ACTION_REF}\` to \`${latestVersion}\`.\`r\`n
 The auto-update function help maintainers keep their workflows up-to-date with the latest version of the action.\`r\`n
 You can close this pull request if you don't want to update the action version.\`r\`n
 Mentioning @vedantmgoyal2009 for a second pair of eyes, in case any breaking changes have been introduced in the new version of the action.
-\"@ | gh pr create --fill --body-file -`,
-        {
-          stdio: 'inherit',
-          cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
-          shell: 'pwsh',
-          env: { ...process.env, GH_TOKEN: token }, // set GH_TOKEN env variable for GitHub CLI (gh)
+\"@ | gh pr create --fill --body-file -`, {
+                stdio: 'inherit',
+                cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
+                shell: 'pwsh',
+                env: { ...process.env, GH_TOKEN: token }, // set GH_TOKEN env variable for GitHub CLI (gh)
+            });
         }
-      );
-    } else {
-      info(`No updates found. Bye bye!`);
+        else {
+            (0, core_1.info)(`No updates found. Bye bye!`);
+        }
     }
-  } else {
-    info(
-      `The workflow maintainer has pinned the action to a commit ref. Skipping update check...`
-    );
-  }
-  info(`::endgroup::`);
+    else {
+        (0, core_1.info)(`The workflow maintainer has pinned the action to a commit ref. Skipping update check...`);
+    }
+    (0, core_1.info)(`::endgroup::`);
 })();
 
 })();

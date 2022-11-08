@@ -3,7 +3,7 @@
     "README.md"
   ],
   "imageSize": 90,
-  "commit": false,
+  "commit": true,
   "contributorsPerLine": 7,
   "contributorsSortAlphabetically": true,
   "projectName": "winget-releaser",
