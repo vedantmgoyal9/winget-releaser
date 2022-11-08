@@ -522,18 +522,7 @@ Function Write-InstallerManifest {
     }
 
     foreach ($_Installer in $InstallerManifest.Installers) {
-        # $Preserve = $true
-        if ($_Installer['ReleaseDate'] -and !$script:ReleaseDatePrompted -and !$true) { $_Installer.Remove('ReleaseDate') }
-        elseif ($true) {
-            # $Preserve = $true
-            try {
-                Get-Date([datetime]$($_Installer['ReleaseDate'])) -f 'yyyy-MM-dd' -OutVariable _ValidDate | Out-Null
-                if ($_ValidDate) { $_Installer['ReleaseDate'] = $_ValidDate | TrimString }
-            } catch {
-                # Release date isn't valid
-                $_Installer.Remove('ReleaseDate')
-            }
-        }
+        if ($_Installer['ReleaseDate'] -and !$script:ReleaseDatePrompted) { $_Installer.Remove('ReleaseDate') }
     }
 
     Add-YamlParameter -Object $InstallerManifest -Parameter 'ManifestType' -Value 'installer'
@@ -671,9 +660,9 @@ Function Write-LocaleManifest {
     if ($LocaleManifest['Tags']) { $LocaleManifest['Tags'] = @($LocaleManifest['Tags'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
     if ($LocaleManifest['Moniker']) { $LocaleManifest['Moniker'] = $LocaleManifest['Moniker'] | ToLower | NoWhitespace }
 
-    # Clean up the volatile fields                                                     # $Preserve = $true
-    if ($LocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull) -and !$true) { $LocaleManifest.Remove('ReleaseNotes') }
-    if ($LocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotesUrl -IsNull) -and !$true) { $LocaleManifest.Remove('ReleaseNotesUrl') }
+    # Clean up the volatile fields
+    if ($LocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull)) { $LocaleManifest.Remove('ReleaseNotes') }
+    if ($LocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotesUrl -IsNull)) { $LocaleManifest.Remove('ReleaseNotesUrl') }
 
     if ($InputKeys -contains 'Locales') { $InputLocales = ($InputObject.Locales | Get-Member | Where-Object { $_.MemberType -eq 'NoteProperty' }).Name }
     foreach ($_Key in $LocaleProperties) { if ($InputKeys -contains $_Key) { $LocaleManifest[$_Key] = $InputObject.$_Key } }
@@ -714,9 +703,9 @@ Function Write-LocaleManifest {
                 # Clean up the existing files just in case
                 if ($script:OldLocaleManifest['Tags']) { $script:OldLocaleManifest['Tags'] = @($script:OldLocaleManifest['Tags'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
 
-                # Clean up the volatile fields                                                        # $Preserve = $true
-                if ($OldLocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull) -and !$true) { $OldLocaleManifest.Remove('ReleaseNotes') }
-                if ($OldLocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotesUrl -IsNull) -and !$true) { $OldLocaleManifest.Remove('ReleaseNotesUrl') }
+                # Clean up the volatile fields
+                if ($OldLocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull)) { $OldLocaleManifest.Remove('ReleaseNotes') }
+                if ($OldLocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotesUrl -IsNull)) { $OldLocaleManifest.Remove('ReleaseNotesUrl') }
 
                 $script:OldLocaleManifest = Restore-YamlKeyOrder $script:OldLocaleManifest $LocaleProperties
 
