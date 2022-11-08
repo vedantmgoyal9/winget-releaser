@@ -1,7 +1,7 @@
-const { getInput, info, getBooleanInput, error } = require('@actions/core');
-const { context, getOctokit } = require('@actions/github');
-const { execSync } = require('child_process');
-const { resolve } = require('path');
+import { getInput, info, getBooleanInput, error } from '@actions/core';
+import { context, getOctokit } from '@actions/github';
+import { execSync } from 'child_process';
+import { resolve } from 'path';
 
 (async () => {
   // check if the runner operating system is windows
@@ -66,7 +66,7 @@ const { resolve } = require('path');
     { stdio: 'inherit' }
   );
   execSync(
-    `Invoke-WebRequest -Uri https://github.com/vedantmgoyal2009/winget-releaser/raw/${process.env.GITHUB_ACTION_REF}/YamlCreate.ps1 -OutFile .\\winget-pkgs\\Tools\\YamlCreate.ps1`,
+    `Invoke-WebRequest -Uri https://github.com/vedantmgoyal2009/winget-releaser/raw/${process.env.GITHUB_ACTION_REF}/src/YamlCreate.ps1 -OutFile .\\winget-pkgs\\Tools\\YamlCreate.ps1`,
     { shell: 'pwsh', stdio: 'inherit' }
   );
   execSync(`git -C winget-pkgs commit --all -m \"Update YamlCreate.ps1\"`, {
@@ -94,7 +94,7 @@ const { resolve } = require('path');
         return asset.browser_download_url;
       }),
     ReleaseNotesUrl: releaseInfo.html_url,
-    ReleaseDate: new Date(releaseInfo.published_at).toISOString().slice(0, 10),
+    ReleaseDate: new Date(releaseInfo.published_at!).toISOString().slice(0, 10),
     DeletePreviousVersion: delPrevVersion,
   });
   execSync(`.\\YamlCreate.ps1 \'${inputObject}\'`, {
