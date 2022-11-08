@@ -26,6 +26,8 @@ WinGet Releaser allows you to automate this process, with pull requests that are
 - Give `workflow` permission to the token you created in Step 1. This will allow the action to automatically update your fork with the upstream repository.
 - You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date with the upstream repository via automated pull requests.
 
+3. Please note that releases in draft or unpublished status can't be submitted to WinGet, simply because their binaries are not available for general download.
+
 <table>
 <tr>
 <th align="center"> Workflow with the minimal configuration </th>
@@ -131,7 +133,7 @@ jobs:
 </tr>
 </table>
 
-## Configuration Options
+## Configuration Options ⚒️
 
 ### Package Identifier (identifier)
 
