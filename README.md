@@ -17,17 +17,24 @@ WinGet Releaser allows you to automate this process, with pull requests that are
 
 ## Getting Started 🚀
 
-1. You will need to create a Personal Access Token (PAT) with `public_repo` scope.
+1. Your application must first have at least one manifest in [WinGet Community Repository][winget-pkgs-repo]. This action will take the latest existing manifest as a starting point for the new release. If you still haven't created and uploaded a manifest, [do that first][create-manifest].
+
+2. You will need to create a Personal Access Token (PAT) with `public_repo` scope.
 
 <img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pat-scope.png" />
 
-2. Fork the [winget-pkgs][winget-pkgs-repo] repository under the same account/organization as your repository on which you want to use this action. Ensure that the fork is up-to-date with the upstream repository. You can do this using one of the following methods:
+3. Fork the [winget-pkgs][winget-pkgs-repo] repository under the same account/organization as your repository on which you want to use this action. Ensure that the fork is up-to-date with the upstream repository. You can do this using one of the following methods:
 
 - Give `workflow` permission to the token you created in Step 1. This will allow the action to automatically update your fork with the upstream repository.
 - You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date with the upstream repository via automated pull requests.
 
-3. Please note that releases in draft or unpublished status can't be submitted to WinGet, simply because their binaries are not available for general download.
+4. Add this action to a GitHub Actions Workflow on your project:
 
+- A simple and effective way is to **create a new workflow** that triggers on the [`release` event][release-event] with [`released` Activity Type][release-activity-type], which means it will fire when a GitHub release is published, or a pre-release is changed to a release.
+- Or you could add this action to an existing workflow, but please note that this action can't be used when the release is in draft or unpublished status, simply because their binaries are not yet available for general download. The release must be in **published**, **not-draft** status.
+  
+## Examples
+  
 <table>
 <tr>
 <th align="center"> Workflow with the minimal configuration </th>
@@ -256,3 +263,6 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 [winget-pkgs-repo]: https://github.com/microsoft/winget-pkgs
 [pull-app-auto-update-forks]: https://github.com/wei/pull
 [gh-encrypted-secrets]: https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow
+[create-manifest]: https://learn.microsoft.com/windows/package-manager/package/
+[release-event]: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release
+[release-activity-type]: https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#release
