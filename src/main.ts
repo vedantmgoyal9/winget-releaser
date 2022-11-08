@@ -5,7 +5,7 @@ import { resolve } from 'path';
 
 (async () => {
   // check if the runner operating system is windows
-  if (process.platform != 'win32') {
+  if (process.platform !== 'win32') {
     error('This action only works on Windows.');
     process.exit(1);
   }
@@ -35,46 +35,46 @@ import { resolve } from 'path';
   // install powershell-yaml, clone winget-pkgs repo and configure remotes, update yamlcreate, and
   // download wingetdev from vedantmgoyal2009/vedantmgoyal2009 (winget-pkgs-automation)
   info(
-    `::group::Install powershell-yaml, clone winget-pkgs and configure remotes, update YamlCreate, download wingetdev...`
+    `::group::Install powershell-yaml, clone winget-pkgs and configure remotes, update YamlCreate, download wingetdev...`,
   );
   execSync(
     `Install-Module -Name powershell-yaml -Repository PSGallery -Scope CurrentUser -Force`,
-    { shell: 'pwsh', stdio: 'inherit' }
+    { shell: 'pwsh', stdio: 'inherit' },
   );
   // remove winget-pkgs directory if it exists, in case the action is run multiple times for
   // publishing multiple packages in the same workflow
   execSync(
     `If (Test-Path -Path .\\winget-pkgs\\) { Remove-Item -Path .\\winget-pkgs\\ -Recurse -Force -ErrorAction SilentlyContinue }`,
-    { shell: 'pwsh', stdio: 'inherit' }
+    { shell: 'pwsh', stdio: 'inherit' },
   );
   execSync(
     `git clone https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git`,
-    { stdio: 'inherit' }
+    { stdio: 'inherit' },
   );
   execSync(`git -C winget-pkgs config --local user.name github-actions`, {
     stdio: 'inherit',
   });
   execSync(
     `git -C winget-pkgs config --local user.email 41898282+github-actions[bot]@users.noreply.github.com`,
-    { stdio: 'inherit' }
+    { stdio: 'inherit' },
   );
   execSync(`git -C winget-pkgs remote rename origin upstream`, {
     stdio: 'inherit',
   });
   execSync(
     `git -C winget-pkgs remote add origin https://github.com/${forkUser}/winget-pkgs.git`,
-    { stdio: 'inherit' }
+    { stdio: 'inherit' },
   );
   execSync(
     `Invoke-WebRequest -Uri https://github.com/vedantmgoyal2009/winget-releaser/raw/${process.env.GITHUB_ACTION_REF}/src/YamlCreate.ps1 -OutFile .\\winget-pkgs\\Tools\\YamlCreate.ps1`,
-    { shell: 'pwsh', stdio: 'inherit' }
+    { shell: 'pwsh', stdio: 'inherit' },
   );
   execSync(`git -C winget-pkgs commit --all -m \"Update YamlCreate.ps1\"`, {
     stdio: 'inherit',
   });
   execSync(
     `svn checkout https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/tools/wingetdev`,
-    { stdio: 'inherit' }
+    { stdio: 'inherit' },
   );
   info(`::endgroup::`);
 
@@ -124,7 +124,7 @@ import { resolve } from 'path';
         `git clone https://x-access-token:${token}@github.com/${process.env.GITHUB_REPOSITORY}.git`,
         {
           stdio: 'inherit',
-        }
+        },
       );
       execSync(`git config --local user.name github-actions`, {
         stdio: 'inherit',
@@ -132,7 +132,7 @@ import { resolve } from 'path';
       });
       execSync(
         `git config --local user.email 41898282+github-actions[bot]@users.noreply.github.com`,
-        { stdio: 'inherit', cwd: process.env.GITHUB_REPOSITORY!.split('/')[1] }
+        { stdio: 'inherit', cwd: process.env.GITHUB_REPOSITORY!.split('/')[1] },
       );
       // replace the version in the workflow file using `find` and `sed`
       execSync(
@@ -143,7 +143,7 @@ import { resolve } from 'path';
             process.env.GITHUB_REPOSITORY!.split('/')[1]
           }/.github/workflows`,
           shell: 'bash',
-        }
+        },
       );
       // create a new branch, commit and push the changes, and create a pull request
       execSync(
@@ -151,7 +151,7 @@ import { resolve } from 'path';
         {
           stdio: 'inherit',
           cwd: process.env.GITHUB_REPOSITORY!.split('/')[1],
-        }
+        },
       );
       execSync(`git switch -c winget-releaser/update-to-${latestVersion}`, {
         stdio: 'inherit',
@@ -162,7 +162,7 @@ import { resolve } from 'path';
         {
           stdio: 'inherit',
           cwd: process.env.GITHUB_REPOSITORY!.split('/')[1],
-        }
+        },
       );
       execSync(
         `@\"
@@ -176,14 +176,14 @@ Mentioning @vedantmgoyal2009 for a second pair of eyes, in case any breaking cha
           cwd: process.env.GITHUB_REPOSITORY!.split('/')[1],
           shell: 'pwsh',
           env: { ...process.env, GH_TOKEN: token }, // set GH_TOKEN env variable for GitHub CLI (gh)
-        }
+        },
       );
     } else {
       info(`No updates found. Bye bye!`);
     }
   } else {
     info(
-      `The workflow maintainer has pinned the action to a commit ref. Skipping update check...`
+      `The workflow maintainer has pinned the action to a commit ref. Skipping update check...`,
     );
   }
   info(`::endgroup::`);

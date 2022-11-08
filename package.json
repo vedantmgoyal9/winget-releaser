@@ -4,8 +4,16 @@
   "description": "Publish new releases of your application to Windows Package Manager easily.",
   "main": "dist/index.js",
   "scripts": {
-    "build": "npx ncc build --license licenses.txt",
+    "all": "npm run format && npm run build && rm src/main.js",
+    "format": "prettier --write src *.* .github",
+    "build": "tsc && ncc build src/main.js --license licenses.txt",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "prettier": {
+    "trailingComma": "all",
+    "tabWidth": 2,
+    "semi": true,
+    "singleQuote": true
   },
   "repository": {
     "type": "git",
@@ -29,12 +37,7 @@
   "devDependencies": {
     "@types/node": "^18.11.9",
     "@vercel/ncc": "^0.34.0",
+    "prettier": "^2.7.1",
     "typescript": "^4.8.4"
-  },
-  "prettier": {
-    "trailingComma": "es5",
-    "tabWidth": 2,
-    "semi": true,
-    "singleQuote": true
   }
 }

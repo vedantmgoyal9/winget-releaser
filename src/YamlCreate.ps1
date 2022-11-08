@@ -4,7 +4,7 @@
 Param
 (
     [Parameter(Mandatory = $true)]
-    [PSCustomObject] $InputObject
+    $InputObject
 )
 $ProgressPreference = 'SilentlyContinue'
 
