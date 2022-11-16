@@ -8,7 +8,7 @@ Param
 )
 $ProgressPreference = 'SilentlyContinue'
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.1 using InputObject 🤖'
+$ScriptHeader = '# Created with WinGet Releaser 🛫 using YamlCreate.ps1 v2.2.1'
 $ManifestVersion = '1.2.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
