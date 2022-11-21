@@ -2,7 +2,7 @@ import { getInput, info, getBooleanInput, error } from '@actions/core';
 import { context, getOctokit } from '@actions/github';
 import { execSync } from 'child_process';
 import { resolve } from 'path';
-import { simpleGit } from 'simple-git';
+import { SimpleGit, simpleGit } from 'simple-git';
 import { request } from "https";
 import * as fs from "fs";
 
@@ -35,8 +35,9 @@ import * as fs from "fs";
     ).data,
   };
 
-  const remote = "https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git"
-  const modifiedYamlCreate = "https://github.com/vedantmgoyal2009/winget-releaser/raw/${process.env.GITHUB_ACTION_REF}/src/YamlCreate.ps1"
+  const remote = "https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git";
+  const modifiedYamlCreate = "https://github.com/vedantmgoyal2009/winget-releaser/raw/${process.env.GITHUB_ACTION_REF}/src/YamlCreate.ps1";
+  const git: SimpleGit = simpleGit();
 
   const inputObject = JSON.stringify({
     PackageIdentifier: pkgid,
@@ -63,13 +64,14 @@ import * as fs from "fs";
     `Install-Module -Name powershell-yaml -Repository PSGallery -Scope CurrentUser -Force`,
     { shell: 'pwsh', stdio: 'inherit' },
   );
+
   // Remove winget-pkgs directory if it exists, in case the action is ran multiple times for
   // publishing multiple packages in the same workflow
   if (fs.existsSync("winget-pkgs")) {
       fs.rmdirSync("winget-pkgs", { recursive: true });
   }
-  simpleGit()
-      .clone(remote)
+
+  git.clone(remote)
       .cwd("winget-pkgs")
       .addConfig("user.name", "github-actions", false, 'local')
       .addConfig("user.email", "41898282+github-actions[bot]@users.noreply.github.com", false, 'local')
@@ -79,7 +81,8 @@ import * as fs from "fs";
         request(modifiedYamlCreate).pipe(fs.createWriteStream('Tools\\YamlCreate.ps1'))
       })
       .commit("Update YamlCreate.ps1")
-      .checkout("https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/tools/wingetdev");
+
+  git.clone("https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/tools/wingetdev");
 
   process.env.WINGETDEV = resolve('wingetdev', 'wingetdev.exe')
 
@@ -107,8 +110,7 @@ import * as fs from "fs";
 
     // if the latest version is greater than the current version, then update the action
     if (latestVersion > process.env.GITHUB_ACTION_REF!) {
-      simpleGit()
-          .clone(`https://x-access-token:${token}@github.com/${process.env.GITHUB_REPOSITORY}.git`)
+      git.clone(`https://x-access-token:${token}@github.com/${process.env.GITHUB_REPOSITORY}.git`)
           .cwd(process.env.GITHUB_REPOSITORY!.split('/')[1])
           .addConfig("user.name", "github-actions", false, 'local')
           .addConfig("user.email", "41898282+github-actions[bot]@users.noreply.github.com", false, 'local')
