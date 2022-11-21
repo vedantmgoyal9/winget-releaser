@@ -38,6 +38,22 @@ import * as fs from "fs";
   const remote = "https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git"
   const modifiedYamlCreate = "https://github.com/vedantmgoyal2009/winget-releaser/raw/${process.env.GITHUB_ACTION_REF}/src/YamlCreate.ps1"
 
+  const inputObject = JSON.stringify({
+    PackageIdentifier: pkgid,
+    PackageVersion:
+        version || new RegExp(/(?<=v).*/g).exec(releaseInfo.tag_name)![0],
+    InstallerUrls: releaseInfo.assets
+        .filter((asset) => {
+          return new RegExp(instRegex, 'g').test(asset.name);
+        })
+        .map((asset) => {
+          return asset.browser_download_url;
+        }),
+    ReleaseNotesUrl: releaseInfo.html_url,
+    ReleaseDate: new Date(releaseInfo.published_at!).toISOString().slice(0, 10),
+    DeletePreviousVersion: delPrevVersion,
+  });
+
   // install powershell-yaml, clone winget-pkgs repo and configure remotes, update yamlcreate, and
   // download wingetdev from vedantmgoyal2009/vedantmgoyal2009 (winget-pkgs-automation)
   info(
@@ -59,34 +75,16 @@ import * as fs from "fs";
       .addConfig("user.name", "github-actions", false, 'local')
       .addConfig("user.email", "41898282+github-actions[bot]@users.noreply.github.com", false, 'local')
       .remote(["rename", "origin", "upstream"])
-      .addRemote("origin", "https://github.com/${forkUser}/winget-pkgs.git")
+      .addRemote("origin", `https://github.com/${forkUser}/winget-pkgs.git`)
       .exec(() => {
         request(modifiedYamlCreate).pipe(fs.createWriteStream('Tools\\YamlCreate.ps1'))
       })
       .commit("Update YamlCreate.ps1")
-      .checkout("https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/tools/wingetdev");
+      .checkout("https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/tools/wingetdev")
 
-  info(`::endgroup::`);
-
-  // resolve wingetdev path (./wingetdev/wingetdev.exe)
-  process.env.WINGETDEV = resolve('wingetdev', 'wingetdev.exe');
+  process.env.WINGETDEV = resolve('wingetdev', 'wingetdev.exe')
 
   info(`::group::Update manifests and create pull request`);
-  const inputObject = JSON.stringify({
-    PackageIdentifier: pkgid,
-    PackageVersion:
-      version || new RegExp(/(?<=v).*/g).exec(releaseInfo.tag_name)![0],
-    InstallerUrls: releaseInfo.assets
-      .filter((asset) => {
-        return new RegExp(instRegex, 'g').test(asset.name);
-      })
-      .map((asset) => {
-        return asset.browser_download_url;
-      }),
-    ReleaseNotesUrl: releaseInfo.html_url,
-    ReleaseDate: new Date(releaseInfo.published_at!).toISOString().slice(0, 10),
-    DeletePreviousVersion: delPrevVersion,
-  });
   execSync(`.\\YamlCreate.ps1 \'${inputObject}\'`, {
     cwd: 'winget-pkgs/Tools',
     shell: 'pwsh',
@@ -110,50 +108,25 @@ import * as fs from "fs";
 
     // if the latest version is greater than the current version, then update the action
     if (latestVersion > process.env.GITHUB_ACTION_REF!) {
-      execSync(
-        `git clone https://x-access-token:${token}@github.com/${process.env.GITHUB_REPOSITORY}.git`,
-        {
-          stdio: 'inherit',
-        },
-      );
-      execSync(`git config --local user.name github-actions`, {
-        stdio: 'inherit',
-        cwd: process.env.GITHUB_REPOSITORY!.split('/')[1],
-      });
-      execSync(
-        `git config --local user.email 41898282+github-actions[bot]@users.noreply.github.com`,
-        { stdio: 'inherit', cwd: process.env.GITHUB_REPOSITORY!.split('/')[1] },
-      );
-      // replace the version in the workflow file using `find` and `sed`
-      execSync(
-        `find -name '*.yml' -or -name '*.yaml' -exec sed -i 's/vedantmgoyal2009\\/winget-releaser@${process.env.GITHUB_ACTION_REF}/vedantmgoyal2009\\/winget-releaser@${latestVersion}/g' {} +`,
-        {
-          stdio: 'inherit',
-          cwd: `${
-            process.env.GITHUB_REPOSITORY!.split('/')[1]
-          }/.github/workflows`,
-          shell: 'bash',
-        },
-      );
-      // create a new branch, commit and push the changes, and create a pull request
-      execSync(
-        `git commit --all -m \"ci(winget-releaser): update action from ${process.env.GITHUB_ACTION_REF} to ${latestVersion}\"`,
-        {
-          stdio: 'inherit',
-          cwd: process.env.GITHUB_REPOSITORY!.split('/')[1],
-        },
-      );
-      execSync(`git switch -c winget-releaser/update-to-${latestVersion}`, {
-        stdio: 'inherit',
-        cwd: process.env.GITHUB_REPOSITORY!.split('/')[1],
-      });
-      execSync(
-        `git push --force-with-lease --set-upstream origin winget-releaser/update-to-${latestVersion}`,
-        {
-          stdio: 'inherit',
-          cwd: process.env.GITHUB_REPOSITORY!.split('/')[1],
-        },
-      );
+      simpleGit()
+          .clone(`https://x-access-token:${token}@github.com/${process.env.GITHUB_REPOSITORY}.git`)
+          .addConfig("user.name", "github-actions", false, 'local')
+          .addConfig("user.email", "41898282+github-actions[bot]@users.noreply.github.com", false, 'local')
+          .exec(() => {
+            execSync(
+                `find -name '*.yml' -or -name '*.yaml' -exec sed -i 's/vedantmgoyal2009\\/winget-releaser@${process.env.GITHUB_ACTION_REF}/vedantmgoyal2009\\/winget-releaser@${latestVersion}/g' {} +`,
+                {
+                  stdio: 'inherit',
+                  cwd: `${
+                      process.env.GITHUB_REPOSITORY!.split('/')[1]
+                  }/.github/workflows`,
+                  shell: 'bash',
+                },
+            )
+          })
+          .commit(`ci(winget-releaser): update action from ${process.env.GITHUB_ACTION_REF} to ${latestVersion}`)
+          .branch([ '-c', `winget-releaser/update-to-${latestVersion}` ])
+          .push(['--force-with-lease', '--set-upstream', 'origin', `winget-releaser/update-to-${latestVersion}`]);
       execSync(
         `@\"
 This PR was automatically created by the [WinGet Releaser GitHub Action](https://github.com/vedantmgoyal2009/winget-releaser) to update the action version from \`${process.env.GITHUB_ACTION_REF}\` to \`${latestVersion}\`.\`r\`n
