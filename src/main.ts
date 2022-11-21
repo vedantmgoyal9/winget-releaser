@@ -80,11 +80,11 @@ import * as fs from "fs";
       .exec(() => {
         request(modifiedYamlCreate).pipe(fs.createWriteStream('Tools\\YamlCreate.ps1'))
       })
-      .commit("Update YamlCreate.ps1")
+      .commit("Update YamlCreate.ps1");
 
   git.clone("https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/tools/wingetdev");
 
-  process.env.WINGETDEV = resolve('wingetdev', 'wingetdev.exe')
+  process.env.WINGETDEV = resolve('wingetdev', 'wingetdev.exe');
 
   info(`::group::Update manifests and create pull request`);
   execSync(`.\\YamlCreate.ps1 \'${inputObject}\'`, {
