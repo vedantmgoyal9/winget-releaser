@@ -72,6 +72,7 @@ import * as fs from "fs";
 
   simpleGit()
       .clone(remote)
+      .cwd("winget-pkgs")
       .addConfig("user.name", "github-actions", false, 'local')
       .addConfig("user.email", "41898282+github-actions[bot]@users.noreply.github.com", false, 'local')
       .remote(["rename", "origin", "upstream"])
@@ -110,6 +111,7 @@ import * as fs from "fs";
     if (latestVersion > process.env.GITHUB_ACTION_REF!) {
       simpleGit()
           .clone(`https://x-access-token:${token}@github.com/${process.env.GITHUB_REPOSITORY}.git`)
+          .cwd(process.env.GITHUB_REPOSITORY!.split('/')[1])
           .addConfig("user.name", "github-actions", false, 'local')
           .addConfig("user.email", "41898282+github-actions[bot]@users.noreply.github.com", false, 'local')
           .exec(() => {
