@@ -63,13 +63,11 @@ import * as fs from "fs";
     `Install-Module -Name powershell-yaml -Repository PSGallery -Scope CurrentUser -Force`,
     { shell: 'pwsh', stdio: 'inherit' },
   );
-  // remove winget-pkgs directory if it exists, in case the action is run multiple times for
+  // Remove winget-pkgs directory if it exists, in case the action is ran multiple times for
   // publishing multiple packages in the same workflow
-  execSync(
-    `If (Test-Path -Path .\\winget-pkgs\\) { Remove-Item -Path .\\winget-pkgs\\ -Recurse -Force -ErrorAction SilentlyContinue }`,
-    { shell: 'pwsh', stdio: 'inherit' },
-  );
-
+  if (fs.existsSync("winget-pkgs")) {
+      fs.rmdirSync("winget-pkgs", { recursive: true });
+  }
   simpleGit()
       .clone(remote)
       .cwd("winget-pkgs")
@@ -81,7 +79,7 @@ import * as fs from "fs";
         request(modifiedYamlCreate).pipe(fs.createWriteStream('Tools\\YamlCreate.ps1'))
       })
       .commit("Update YamlCreate.ps1")
-      .checkout("https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/tools/wingetdev")
+      .checkout("https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/tools/wingetdev");
 
   process.env.WINGETDEV = resolve('wingetdev', 'wingetdev.exe')
 
