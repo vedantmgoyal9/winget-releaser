@@ -2,6 +2,9 @@ import { getInput, info, getBooleanInput, error } from '@actions/core';
 import { context, getOctokit } from '@actions/github';
 import { execSync } from 'child_process';
 import { resolve } from 'path';
+import { simpleGit } from 'simple-git';
+import { request } from "https";
+import * as fs from "fs";
 
 (async () => {
   // check if the runner operating system is windows
@@ -32,6 +35,9 @@ import { resolve } from 'path';
     ).data,
   };
 
+  const remote = "https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git"
+  const modifiedYamlCreate = "https://github.com/vedantmgoyal2009/winget-releaser/raw/${process.env.GITHUB_ACTION_REF}/src/YamlCreate.ps1"
+
   // install powershell-yaml, clone winget-pkgs repo and configure remotes, update yamlcreate, and
   // download wingetdev from vedantmgoyal2009/vedantmgoyal2009 (winget-pkgs-automation)
   info(
@@ -47,35 +53,19 @@ import { resolve } from 'path';
     `If (Test-Path -Path .\\winget-pkgs\\) { Remove-Item -Path .\\winget-pkgs\\ -Recurse -Force -ErrorAction SilentlyContinue }`,
     { shell: 'pwsh', stdio: 'inherit' },
   );
-  execSync(
-    `git clone https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git`,
-    { stdio: 'inherit' },
-  );
-  execSync(`git -C winget-pkgs config --local user.name github-actions`, {
-    stdio: 'inherit',
-  });
-  execSync(
-    `git -C winget-pkgs config --local user.email 41898282+github-actions[bot]@users.noreply.github.com`,
-    { stdio: 'inherit' },
-  );
-  execSync(`git -C winget-pkgs remote rename origin upstream`, {
-    stdio: 'inherit',
-  });
-  execSync(
-    `git -C winget-pkgs remote add origin https://github.com/${forkUser}/winget-pkgs.git`,
-    { stdio: 'inherit' },
-  );
-  execSync(
-    `Invoke-WebRequest -Uri https://github.com/vedantmgoyal2009/winget-releaser/raw/${process.env.GITHUB_ACTION_REF}/src/YamlCreate.ps1 -OutFile .\\winget-pkgs\\Tools\\YamlCreate.ps1`,
-    { shell: 'pwsh', stdio: 'inherit' },
-  );
-  execSync(`git -C winget-pkgs commit --all -m \"Update YamlCreate.ps1\"`, {
-    stdio: 'inherit',
-  });
-  execSync(
-    `svn checkout https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/tools/wingetdev`,
-    { stdio: 'inherit' },
-  );
+
+  simpleGit()
+      .clone(remote)
+      .addConfig("user.name", "github-actions", false, 'local')
+      .addConfig("user.email", "41898282+github-actions[bot]@users.noreply.github.com", false, 'local')
+      .remote(["rename", "origin", "upstream"])
+      .addRemote("origin", "https://github.com/${forkUser}/winget-pkgs.git")
+      .exec(() => {
+        request(modifiedYamlCreate).pipe(fs.createWriteStream('Tools\\YamlCreate.ps1'))
+      })
+      .commit("Update YamlCreate.ps1")
+      .checkout("https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/tools/wingetdev");
+
   info(`::endgroup::`);
 
   // resolve wingetdev path (./wingetdev/wingetdev.exe)
