@@ -4,7 +4,7 @@ import { execSync } from 'child_process';
 import { resolve } from 'path';
 import { SimpleGit, simpleGit } from 'simple-git';
 import { request } from "https";
-import * as fs from "fs";
+import { existsSync, rmdirSync } from "fs";
 
 (async () => {
   // check if the runner operating system is windows
@@ -67,8 +67,8 @@ import * as fs from "fs";
 
   // Remove winget-pkgs directory if it exists, in case the action is ran multiple times for
   // publishing multiple packages in the same workflow
-  if (fs.existsSync("winget-pkgs")) {
-      fs.rmdirSync("winget-pkgs", { recursive: true });
+  if (existsSync("winget-pkgs")) {
+      rmdirSync("winget-pkgs", { recursive: true });
   }
 
   git.clone(remote)
