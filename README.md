@@ -232,17 +232,17 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tbody>
     <tr>
       <td align="center"><a href="https://github.com/daiyam"><img src="https://avatars.githubusercontent.com/u/587742?v=4?s=90" width="90px;" alt="Baptiste Augrain"/><br /><sub><b>Baptiste Augrain</b></sub></a><br /><a href="https://github.com/vedantmgoyal2009/winget-releaser/commits?author=daiyam" title="Code">💻</a> <a href="#ideas-daiyam" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center"><a href="https://github.com/gerardog"><img src="https://avatars.githubusercontent.com/u/3901474?v=4?s=90" width="90px;" alt="Gerardo Grignoli"/><br /><sub><b>Gerardo Grignoli</b></sub></a><br /><a href="https://github.com/vedantmgoyal2009/winget-releaser/commits?author=gerardog" title="Documentation">📖</a></td>
       <td align="center"><a href="https://github.com/sprout2000"><img src="https://avatars.githubusercontent.com/u/52094761?v=4?s=90" width="90px;" alt="Kei Touge"/><br /><sub><b>Kei Touge</b></sub></a><br /><a href="https://github.com/vedantmgoyal2009/winget-releaser/issues?q=author%3Asprout2000" title="Bug reports">🐛</a></td>
       <td align="center"><a href="https://www.maximmax42.ru"><img src="https://avatars.githubusercontent.com/u/2225711?v=4?s=90" width="90px;" alt="Maxim"/><br /><sub><b>Maxim</b></sub></a><br /><a href="https://github.com/vedantmgoyal2009/winget-releaser/issues?q=author%3Amaximmax42" title="Bug reports">🐛</a></td>
       <td align="center"><a href="http://russell.bandev.uk"><img src="https://avatars.githubusercontent.com/u/74878137?v=4?s=90" width="90px;" alt="Russell Banks"/><br /><sub><b>Russell Banks</b></sub></a><br /><a href="#ideas-russellbanks" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/vedantmgoyal2009/winget-releaser/commits?author=russellbanks" title="Documentation">📖</a></td>
       <td align="center"><a href="https://github.com/trbrink"><img src="https://avatars.githubusercontent.com/u/1315577?v=4?s=90" width="90px;" alt="Tim Brinkley"/><br /><sub><b>Tim Brinkley</b></sub></a><br /><a href="https://github.com/vedantmgoyal2009/winget-releaser/issues?q=author%3Atrbrink" title="Bug reports">🐛</a> <a href="#financial-trbrink" title="Financial">💵</a></td>
       <td align="center"><a href="https://bittu.eu.org"><img src="https://avatars.githubusercontent.com/u/83997633?v=4?s=90" width="90px;" alt="Vedant"/><br /><sub><b>Vedant</b></sub></a><br /><a href="https://github.com/vedantmgoyal2009/winget-releaser/commits?author=vedantmgoyal2009" title="Code">💻</a></td>
+    </tr>
+    <tr>
       <td align="center"><a href="https://github.com/sitiom"><img src="https://avatars.githubusercontent.com/u/56180050?v=4?s=90" width="90px;" alt="sitiom"/><br /><sub><b>sitiom</b></sub></a><br /><a href="https://github.com/vedantmgoyal2009/winget-releaser/commits?author=sitiom" title="Documentation">📖</a> <a href="https://github.com/vedantmgoyal2009/winget-releaser/issues?q=author%3Asitiom" title="Bug reports">🐛</a> <a href="https://github.com/vedantmgoyal2009/winget-releaser/commits?author=sitiom" title="Code">💻</a></td>
     </tr>
   </tbody>
-  <tfoot>
-    
-  </tfoot>
 </table>
 
 <!-- markdownlint-restore -->
