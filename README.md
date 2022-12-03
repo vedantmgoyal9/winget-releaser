@@ -1,4 +1,4 @@
-<h1> <img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/github-actions-logo.png" width="32" height="32" /> WinGet Releaser (GitHub Action) </h1>
+<h1> <img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/github-actions-logo.png" width="32" height="32" alt="Logo" /> WinGet Releaser (GitHub Action) </h1>
 
 ![GitHub contributors (via allcontributors.org)][github-all-contributors-badge]
 ![GitHub issues][github-issues-badge]
@@ -13,28 +13,40 @@ Publish new releases of your application to the Windows Package Manager easily.
 
 Creating manifests and pull requests for every release of your application can be time-consuming and error-prone.
 
-WinGet Releaser allows you to automate this process, with pull requests that are trusted amongst the community, often expediting the amount of time it takes for a submission to be reviewed.
+WinGet Releaser allows you to automate this process, with pull requests that are trusted amongst the community, often
+expediting the amount of time it takes for a submission to be reviewed.
 
 ## Getting Started 🚀
 
-1. Your application must first have at least one manifest in [WinGet Community Repository][winget-pkgs-repo]. This action will take the latest existing manifest as a starting point for the new release. If you still haven't created and uploaded a manifest, [do that first][create-manifest].
+1. Your application must first have at least one manifest in [WinGet Community Repository][winget-pkgs-repo]. This
+   action will take the latest existing manifest as a starting point for the new release. If you still haven't created
+   and uploaded a manifest, [do that first][create-manifest].
 
 2. You will need to create a Personal Access Token (PAT) with `public_repo` scope.
 
-<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pat-scope.png" />
+<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pat-scope.png" alt="Personal Access Token Required Scopes" />
 
-3. Fork the [winget-pkgs][winget-pkgs-repo] repository under the same account/organization as your repository on which you want to use this action. Ensure that the fork is up-to-date with the upstream repository. You can do this using one of the following methods:
+3. Fork the [winget-pkgs][winget-pkgs-repo] repository under the same account/organization as your repository on which
+   you want to use this action. Ensure that the fork is up-to-date with the upstream repository. You can do this using
+   one of the following methods:
 
-- Give `workflow` permission to the token you created in Step 1. This will allow the action to automatically update your fork with the upstream repository.
-- You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date with the upstream repository via automated pull requests.
+- Give `workflow` permission to the token you created in Step 1. This will allow the action to automatically update your
+  fork with the upstream repository.
+- You can use *
+  *[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]
+  ** which keeps your fork up-to-date with the upstream repository via automated pull requests.
 
 4. Add this action to a GitHub Actions Workflow on your project:
 
-- A simple and effective way is to **create a new workflow** that triggers on the [`release` event][release-event] with [`released` Activity Type][release-activity-type], which means it will fire when a GitHub release is published, or a pre-release is changed to a release.
-- Or you could add this action to an existing workflow, but please note that this action can't be used when the release is in draft or unpublished status, simply because their binaries are not yet available for general download. The release must be in **published**, **not-draft** status.
-  
+- A simple and effective way is to **create a new workflow** that triggers on the [`release` event][release-event]
+  with [`released` Activity Type][release-activity-type], which means it will fire when a GitHub release is published,
+  or a pre-release is changed to a release.
+- Or you could add this action to an existing workflow, but please note that this action can't be used when the release
+  is in draft or unpublished status, simply because their binaries are not yet available for general download. The
+  release must be in **published**, **not-draft** status.
+
 ## Examples
-  
+
 <table>
 <tr>
 <th align="center"> Workflow with the minimal configuration </th>
@@ -47,7 +59,7 @@ WinGet Releaser allows you to automate this process, with pull requests that are
 name: Publish to WinGet
 on:
   release:
-    types: [released]
+    types: [ released ]
 jobs:
   publish:
     # Action can only be run on windows
@@ -66,7 +78,7 @@ jobs:
 name: Publish to WinGet
 on:
   release:
-    types: [released]
+    types: [ released ]
 jobs:
   publish:
     runs-on: windows-latest
@@ -91,7 +103,7 @@ jobs:
 name: Publish to WinGet
 on:
   release:
-    types: [released]
+    types: [ released ]
 jobs:
   publish:
     runs-on: windows-latest
@@ -117,7 +129,7 @@ jobs:
 name: Publish to WinGet
 on:
   release:
-    types: [released]
+    types: [ released ]
 jobs:
   publish:
     runs-on: windows-latest
@@ -146,7 +158,8 @@ jobs:
 
 - Required: ✅
 
-The package identifier of the package to be updated in the [Windows Package Manager Community Repository][winget-pkgs-repo].
+The package identifier of the package to be updated in
+the [Windows Package Manager Community Repository][winget-pkgs-repo].
 
 ```yaml
 identifier: Publisher.Package # Microsoft.Excel
@@ -166,7 +179,8 @@ version: ${{ github.event.release.tag_name }} # For tags without the 'v' prefix
 
 - Required: ❌ (Default value: `.(exe|msi|msix|appx)(bundle){0,1}$`)
 
-A regular expression to match the installers from the release artifacts which are to be published to Windows Package Manager (WinGet).
+A regular expression to match the installers from the release artifacts which are to be published to Windows Package
+Manager (WinGet).
 
 ```yaml
 installers-regex: '\.exe$'
@@ -184,7 +198,7 @@ installers-regex: '\.exe$'
 Set this to true if you want to overwrite the previous version of the package with the latest version.
 
 ```yaml
-delete-previous-version: 'true' # don't forget to quotes
+delete-previous-version: 'true' # don't forget the quotes
 ```
 
 ### Release tag (release-tag)
@@ -201,7 +215,8 @@ release-tag: ${{ inputs.version }} # workflow_dispatch input `version`
 
 - Required: ✅
 
-The GitHub token with which the action will authenticate with GitHub API and create a pull request on the [microsoft/winget-pkgs][winget-pkgs-repo] repository.
+The GitHub token with which the action will authenticate with GitHub API and create a pull request on
+the [microsoft/winget-pkgs][winget-pkgs-repo] repository.
 
 ```yaml
 token: ${{ secrets.WINGET_TOKEN }} # Repository secret called 'WINGET_TOKEN'
@@ -209,13 +224,15 @@ token: ${{ secrets.WINGET_TOKEN }} # Repository secret called 'WINGET_TOKEN'
 
 #### The token should have the `public_repo` scope.
 
-> **Note** Do **not** directly put the token in the action. Instead, create a repository secret containing the token and use that in the workflow. See [using encrypted secrets in a workflow][gh-encrypted-secrets] for more details.
+> **Note** Do **not** directly put the token in the action. Instead, create a repository secret containing the token and
+> use that in the workflow. See [using encrypted secrets in a workflow][gh-encrypted-secrets] for more details.
 
 ### Use fork under which user (fork-user)
 
 - Required: ❌ (Default value: `${{ github.repository_owner }} # repository owner`)
 
-This is the GitHub username of the user where the fork of [microsoft/winget-pkgs][winget-pkgs-repo] is present. This fork will be used to create the pull request.
+This is the GitHub username of the user where the fork of [microsoft/winget-pkgs][winget-pkgs-repo] is present. This
+fork will be used to create the pull request.
 
 ```yaml
 fork-user: dotnet-winget-bot # for example purposes only
@@ -241,7 +258,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
   </tbody>
   <tfoot>
-    
+
   </tfoot>
 </table>
 
@@ -250,7 +267,8 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification.
+Contributions of any kind welcome!
 
 [playground-dry-run-badge]: https://img.shields.io/badge/Playground_(dry--run)-bittu.eu.org%2Fdocs%2Fwr--playground-abcdef?logo=windowsterminal
 [playground-dry-run]: https://bittu.eu.org/docs/wr-playground
