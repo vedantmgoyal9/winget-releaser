@@ -1,16 +1,26 @@
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Note we have a [code of conduct](./.github/CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
 
-- If you have suggestions for adding or removing projects, feel free to [open an issue](https://github.com/vedantmgoyal2009/winget-releaser/issues/new) to discuss it, or directly create a pull request after you edit the _README.md_ file with necessary changes.
-- Please make sure you check your spelling and grammar.
-- Create individual PR for each suggestion.
-- Please also read through the [Code Of Conduct](https://github.com/vedantmgoyal2009/winget-releaser/blob/main/CODE_OF_CONDUCT.md) before posting your first idea as well.
+Ensure you've read through the documentation so you understand the core concepts and the working of the project.
 
-### Creating A Pull Request
+### How to report a bug
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Search the [issues](https://github.com/vedantmgoyal2009/winget-releaser/issues) to see if the bug has already been reported by someone else, and/or if it has been fixed in the latest version.
+2. If you don't find anything, create a new issue with the following information:
+   - A clear and concise description of what the bug is.
+   - Steps to reproduce the bug.
+   - Expected behavior.
+   - Logs or screenshots (if applicable).
+   - Version of the action you're using.
+   - Any other information that you think might be useful.
+
+### How to contribute to the project
+
+1. Fork the repository
+2. Create a new branch to work on: `git checkout -b <some-branch-name>`
+3. Commit changes by using: `git commit -m 'feat: <short description about the feature>'`
+4. Push branch to your fork: `git push origin <some-branch-name>`
+5. Finally, create a pull request to the main repository
+6. Wait for the PR to be reviewed and merged by the maintainers
+7. Congratulations! Your name will be shown on the README.md file :tada:

@@ -1,6 +1,9 @@
 # Dependency directories
 node_modules/
 
+# JetBrains IDEs
+.idea
+
 # Logs
 logs
 *.log
