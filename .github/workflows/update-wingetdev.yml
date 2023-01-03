@@ -1,0 +1,31 @@
+name: Update WinGetDev
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Every Sunday at 00:00 (weekly)
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Checkout microsoft/winget-cli
+        uses: actions/checkout@v3
+        with:
+          repository: microsoft/winget-cli
+          path: winget-cli
+      - name: Update WinGetDev
+        run: |
+          & 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat' x64
+          & 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe' -t:restore -m -p:RestorePackagesConfig=true -p:Configuration=Release -p:Platform=x64 .\winget-cli\src\AppInstallerCLI.sln
+          & 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe' -m -p:Configuration=Release -p:Platform=x64 .\winget-cli\src\AppInstallerCLI.sln
+          Copy-Item -Path .\winget-cli\src\x64\Release\WindowsPackageManager\WindowsPackageManager.dll -Destination .\winget-releaser\wingetdev\WindowsPackageManager.dll -Force
+          Move-Item -Path .\winget-cli\src\x64\Release\AppInstallerCLI\* -Destination .\winget-releaser\wingetdev -Force
+          Move-Item -Path .\winget-releaser\wingetdev\winget.exe -Destination wingetdev.exe -Force # Rename winget.exe to wingetdev.exe, Rename-Item with -Force doesn't work when the destination file already exists
+          git -C winget-releaser config --local user.name github-actions[bot]
+          git -C winget-releaser config --local user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git -C winget-releaser add .
+          git -C winget-releaser commit -m "chore: update wingetdev [$(Get-Date -Format 'dd MMM yyyy HH:mm:ss zzz')]"
+          git -C winget-releaser push
+        shell: pwsh
+        working-directory: ${{ env.GITHUB_WORKSPACE }}

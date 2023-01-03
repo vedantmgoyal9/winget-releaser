@@ -1,6 +1,211 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 5496:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core_1 = __nccwpck_require__(2186);
+const github_1 = __nccwpck_require__(5438);
+const node_child_process_1 = __nccwpck_require__(7718);
+const node_path_1 = __nccwpck_require__(9411);
+const node_fetch_1 = __importDefault(__nccwpck_require__(467));
+const simple_git_1 = __nccwpck_require__(9103);
+const node_fs_1 = __nccwpck_require__(7561);
+(async () => {
+    // check if the runner operating system is windows
+    if (process.platform !== 'win32') {
+        (0, core_1.error)('This action only works on Windows.');
+        process.exit(1);
+    }
+    // get the inputs from the action
+    const pkgid = (0, core_1.getInput)('identifier');
+    const version = (0, core_1.getInput)('version');
+    const instRegex = (0, core_1.getInput)('installers-regex');
+    const releaseRepository = (0, core_1.getInput)('release-repository');
+    const releaseTag = (0, core_1.getInput)('release-tag');
+    const maxVersionsToKeep = Number((0, core_1.getInput)('max-versions-to-keep'));
+    const token = (0, core_1.getInput)('token');
+    const forkUser = (0, core_1.getInput)('fork-user');
+    const git = (0, simple_git_1.simpleGit)({
+        progress: ({ method, stage, progress, processed, total, }) => {
+            (0, core_1.info)(`git.${method} ${progress}% complete... (${processed}/${total}) (${stage})`);
+        },
+    });
+    const github = (0, github_1.getOctokit)(token);
+    // check if at least one version of the package is already present in winget-pkgs repository
+    (0, node_fetch_1.default)(`https://github.com/microsoft/winget-pkgs/tree/master/manifests/${pkgid
+        .charAt(0)
+        .toLowerCase()}/${pkgid.replace('.', '/')}`, { method: 'HEAD' }).then((res) => {
+        if (!res.ok) {
+            (0, core_1.error)(`Package ${pkgid} does not exist in the winget-pkgs repository. Please add atleast one version of the package before using this action.`);
+            process.exit(1);
+        }
+    });
+    // check if max-versions-to-keep is a valid number and is 0 (keep all versions) or greater than 0
+    if (!Number.isInteger(maxVersionsToKeep) || maxVersionsToKeep < 0) {
+        (0, core_1.error)('Invalid input supplied: max-versions-to-keep should be 0 (zero - keep all versions) or a positive integer.');
+        process.exit(1);
+    }
+    // fetch latest build of wingetdev from the action repository (vedantmgoyal2009/winget-releaser)
+    (0, node_child_process_1.execSync)(`svn checkout https://github.com/vedantmgoyal2009/winget-releaser/trunk/wingetdev`, {
+        shell: 'pwsh',
+        stdio: 'inherit',
+    });
+    // fetch komac.jar from the latest release
+    (0, node_child_process_1.execSync)(`Invoke-WebRequest -Uri https://github.com/russellbanks/Komac/releases/download/nightly/Komac-0.9.0-all.jar -OutFile komac.jar`, {
+        shell: 'pwsh',
+    });
+    // get release information using the release tag
+    const releaseInfo = {
+        ...(await github.rest.repos.getReleaseByTag({
+            owner: github_1.context.repo.owner,
+            repo: releaseRepository,
+            tag: releaseTag,
+        })).data, // get only data, and exclude status, url, and headers
+    };
+    (0, core_1.startGroup)('Updating manifests and creating pull request...');
+    const pkgVersion = version || new RegExp(/(?<=v).*/g).exec(releaseInfo.tag_name)[0];
+    const installerUrls = releaseInfo.assets
+        .filter((asset) => {
+        return new RegExp(instRegex, 'g').test(asset.name);
+    })
+        .map((asset) => {
+        return asset.browser_download_url;
+    });
+    // execute komac to update the manifest and submit the pull request
+    (0, node_child_process_1.execSync)(`java -jar komac.jar update --id ${pkgid} --version ${pkgVersion} --urls \'${installerUrls.join(',')}\' --submit`, {
+        shell: 'pwsh',
+        stdio: 'inherit',
+    });
+    (0, core_1.endGroup)();
+    // get the list of existing versions of the package using wingetdev
+    let existingVersions = await getPackageVersions(pkgid);
+    // if maxVersionsToKeep is not 0, and no. of existing versions is greater than maxVersionsToKeep,
+    // delete the older versions (starting from the oldest version)
+    (0, core_1.startGroup)('Deleting old versions...');
+    (0, core_1.info)(`Number of existing versions: ${existingVersions.length}`);
+    (0, core_1.info)(`Number of versions to keep: ${maxVersionsToKeep}`);
+    if (maxVersionsToKeep !== 0 &&
+        existingVersions.length + 1 > maxVersionsToKeep) {
+        // check if winget-pkgs already exists, and delete it if it does
+        if ((0, node_fs_1.existsSync)('winget-pkgs')) {
+            (0, node_fs_1.rmSync)('winget-pkgs', { recursive: true, force: true });
+        }
+        // clone the winget-pkgs repository, and configure remotes
+        await git
+            .clone(`https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git`)
+            .cwd('winget-pkgs')
+            .addConfig('user.name', 'github-actions', false, 'local')
+            .addConfig('user.email', '41898282+github-actions[bot]@users.noreply.github.com', false, 'local')
+            .remote(['rename', 'origin', 'upstream'])
+            .addRemote('origin', `https://github.com/${forkUser}/winget-pkgs.git`);
+        // build the path to the package directory (e.g. winget-pkgs/manifests/m/Microsoft/OneDrive)
+        const pkgDir = (0, node_path_1.join)('winget-pkgs', 'manifests', `${pkgid[0].toLowerCase()}`, `${pkgid.replace('.', '/')}`);
+        // remove the newer versions from the list of existing versions
+        // the left over versions will be deleted
+        for (let iterator = 0; iterator < maxVersionsToKeep; iterator++)
+            existingVersions.shift();
+        // iterate over the left over versions and delete them
+        existingVersions.forEach(async (version) => await git
+            .cwd('winget-pkgs')
+            .fetch('upstream', 'master')
+            .checkoutLocalBranch(`HEAD:${pkgid}-v${version}-REMOVE`)
+            .exec(() => {
+            if ((0, node_fs_1.existsSync)((0, node_path_1.join)(pkgDir, version)))
+                (0, node_fs_1.rmSync)((0, node_path_1.join)(pkgDir, version), { recursive: true, force: true });
+        })
+            .add('.')
+            .commit(`Remove: ${pkgid} version ${version}`)
+            .push('origin', `HEAD:${pkgid}-v${version}-REMOVE`)
+            .exec(async () => await github.rest.pulls.create({
+            owner: 'microsoft',
+            repo: 'winget-pkgs',
+            title: `Remove: ${pkgid} version ${version}`,
+            head: `${forkUser}:${pkgid}-v${version}-REMOVE`,
+            base: 'master',
+            body: '#### Reason for removal: This version is older than what has been set in `max-versions-to-keep` by the publisher.\n\n' +
+                '###### Pull request has been automatically created using 🛫 [WinGet Releaser](https://github.com/vedantmgoyal2009/winget-releaser).',
+        })));
+    }
+    else {
+        (0, core_1.info)('Result: No versions will be deleted.');
+    }
+    (0, core_1.endGroup)();
+    // check for action updates, and create a pull request if there are any
+    (0, core_1.startGroup)('Checking for action updates...');
+    // check if action version is a version (starts with `v`) and not a pinned commit ref
+    if (!/^v\d+$/g.test(process.env.GITHUB_ACTION_REF)) {
+        (0, core_1.info)(`The workflow maintainer has pinned the action to a commit ref. Skipping update check...`);
+        process.exit(0);
+    }
+    const latestVersion = (await github.rest.repos.getLatestRelease({
+        owner: 'vedantmgoyal2009',
+        repo: 'winget-releaser',
+    })).data.tag_name;
+    (0, core_1.info)(`Current action version: ${process.env.GITHUB_ACTION_REF}`);
+    (0, core_1.info)(`Latest version found: ${latestVersion}`);
+    // if the latest version is not greater than the current version, exit
+    if (!(latestVersion > process.env.GITHUB_ACTION_REF)) {
+        (0, core_1.info)(`No updates found. Bye bye!`);
+        process.exit(0);
+    }
+    await git
+        .clone(`https://x-access-token:${token}@github.com/${process.env.GITHUB_REPOSITORY}.git`)
+        .cwd(process.env.GITHUB_REPOSITORY.split('/')[1])
+        .addConfig('user.name', 'github-actions[bot]', false, 'local')
+        .addConfig('user.email', '41898282+github-actions[bot]@users.noreply.github.com', false, 'local')
+        .exec(() => {
+        (0, node_child_process_1.execSync)(`find -name '*.yml' -or -name '*.yaml' -exec sed -i 's/vedantmgoyal2009\\/winget-releaser@${process.env.GITHUB_ACTION_REF}/vedantmgoyal2009\\/winget-releaser@${latestVersion}/g' {} +`, {
+            stdio: 'inherit',
+            cwd: '.github/workflows',
+            shell: 'bash',
+        });
+    })
+        .commit(`ci(winget-releaser): update action from ${process.env.GITHUB_ACTION_REF} to ${latestVersion}`)
+        .branch(['-c', `winget-releaser/update-to-${latestVersion}`])
+        .push([
+        '--force-with-lease',
+        '--set-upstream',
+        'origin',
+        `winget-releaser/update-to-${latestVersion}`,
+    ])
+        .exec(async () => await github.rest.pulls.create({
+        ...github_1.context.repo,
+        title: `ci(winget-releaser): update action from ${process.env.GITHUB_ACTION_REF} to ${latestVersion}`,
+        head: `winget-releaser/update-to-${latestVersion}`,
+        base: (await github.rest.repos.get({
+            ...github_1.context.repo,
+        })).data.default_branch,
+        body: `This PR was automatically created by the [WinGet Releaser GitHub Action](https://github.com/vedantmgoyal2009/winget-releaser) to update the action version from \`${process.env.GITHUB_ACTION_REF}\` to \`${latestVersion}\`.\r\n` +
+            'The auto-update function help maintainers keep their workflows up-to-date with the latest version of the action.\r\n' +
+            "You can close this pull request if you don't want to update the action version.\r\n" +
+            'Mentioning @vedantmgoyal2009 for a second pair of eyes, in case any breaking changes have been introduced in the new version of the action.',
+    }));
+    (0, core_1.endGroup)();
+})();
+async function getPackageVersions(packageIdentifier) {
+    return new Promise((resolve, reject) => {
+        (0, node_child_process_1.exec)(`wingetdev show --exact --id ${packageIdentifier} --versions --accept-source-agreements --disable-interactivity`, {
+            cwd: 'wingetdev',
+            shell: 'cmd.exe',
+        }, (error, stdout) => {
+            if (error)
+                reject(error);
+            const stdoutLines = stdout.split('\r\n');
+            resolve(stdoutLines.slice(stdoutLines.indexOf('Version') + 2, -1));
+        });
+    });
+}
+
+
+/***/ }),
+
 /***/ 7351:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -7178,6 +7383,20 @@ const isDomainOrSubdomain = function isDomainOrSubdomain(destination, original) 
 };
 
 /**
+ * isSameProtocol reports whether the two provided URLs use the same protocol.
+ *
+ * Both domains must already be in canonical form.
+ * @param {string|URL} original
+ * @param {string|URL} destination
+ */
+const isSameProtocol = function isSameProtocol(destination, original) {
+	const orig = new URL$1(original).protocol;
+	const dest = new URL$1(destination).protocol;
+
+	return orig === dest;
+};
+
+/**
  * Fetch function
  *
  * @param   Mixed    url   Absolute url or Request instance
@@ -7208,7 +7427,7 @@ function fetch(url, opts) {
 			let error = new AbortError('The user aborted a request.');
 			reject(error);
 			if (request.body && request.body instanceof Stream.Readable) {
-				request.body.destroy(error);
+				destroyStream(request.body, error);
 			}
 			if (!response || !response.body) return;
 			response.body.emit('error', error);
@@ -7249,8 +7468,40 @@ function fetch(url, opts) {
 
 		req.on('error', function (err) {
 			reject(new FetchError(`request to ${request.url} failed, reason: ${err.message}`, 'system', err));
+
+			if (response && response.body) {
+				destroyStream(response.body, err);
+			}
+
 			finalize();
 		});
+
+		fixResponseChunkedTransferBadEnding(req, function (err) {
+			if (signal && signal.aborted) {
+				return;
+			}
+
+			destroyStream(response.body, err);
+		});
+
+		/* c8 ignore next 18 */
+		if (parseInt(process.version.substring(1)) < 14) {
+			// Before Node.js 14, pipeline() does not fully support async iterators and does not always
+			// properly handle when the socket close/end events are out of order.
+			req.on('socket', function (s) {
+				s.addListener('close', function (hadError) {
+					// if a data listener is still present we didn't end cleanly
+					const hasDataListener = s.listenerCount('data') > 0;
+
+					// if end happened before close but the socket didn't emit an error, do it now
+					if (response && hasDataListener && !hadError && !(signal && signal.aborted)) {
+						const err = new Error('Premature close');
+						err.code = 'ERR_STREAM_PREMATURE_CLOSE';
+						response.body.emit('error', err);
+					}
+				});
+			});
+		}
 
 		req.on('response', function (res) {
 			clearTimeout(reqTimeout);
@@ -7323,7 +7574,7 @@ function fetch(url, opts) {
 							size: request.size
 						};
 
-						if (!isDomainOrSubdomain(request.url, locationURL)) {
+						if (!isDomainOrSubdomain(request.url, locationURL) || !isSameProtocol(request.url, locationURL)) {
 							for (const name of ['authorization', 'www-authenticate', 'cookie', 'cookie2']) {
 								requestOpts.headers.delete(name);
 							}
@@ -7416,6 +7667,13 @@ function fetch(url, opts) {
 					response = new Response(body, response_options);
 					resolve(response);
 				});
+				raw.on('end', function () {
+					// some old IIS servers return zero-length OK deflate responses, so 'data' is never emitted.
+					if (!response) {
+						response = new Response(body, response_options);
+						resolve(response);
+					}
+				});
 				return;
 			}
 
@@ -7435,6 +7693,41 @@ function fetch(url, opts) {
 		writeToStream(req, request);
 	});
 }
+function fixResponseChunkedTransferBadEnding(request, errorCallback) {
+	let socket;
+
+	request.on('socket', function (s) {
+		socket = s;
+	});
+
+	request.on('response', function (response) {
+		const headers = response.headers;
+
+		if (headers['transfer-encoding'] === 'chunked' && !headers['content-length']) {
+			response.once('close', function (hadError) {
+				// if a data listener is still present we didn't end cleanly
+				const hasDataListener = socket.listenerCount('data') > 0;
+
+				if (hasDataListener && !hadError) {
+					const err = new Error('Premature close');
+					err.code = 'ERR_STREAM_PREMATURE_CLOSE';
+					errorCallback(err);
+				}
+			});
+		}
+	});
+}
+
+function destroyStream(stream, err) {
+	if (stream.destroy) {
+		stream.destroy(err);
+	} else {
+		// node < 8
+		stream.emit('error', err);
+		stream.end();
+	}
+}
+
 /**
  * Redirect code matching
  *
@@ -8624,7 +8917,7 @@ var init_abort_plugin = __esm({
 
 // src/lib/plugins/block-unsafe-operations-plugin.ts
 function isConfigSwitch(arg) {
-  return arg.trim().toLowerCase() === "-c";
+  return typeof arg === "string" && arg.trim().toLowerCase() === "-c";
 }
 function preventProtocolOverride(arg, next) {
   if (!isConfigSwitch(arg)) {
@@ -8635,15 +8928,28 @@ function preventProtocolOverride(arg, next) {
   }
   throw new GitPluginError(void 0, "unsafe", "Configuring protocol.allow is not permitted without enabling allowUnsafeExtProtocol");
 }
+function preventUploadPack(arg, method) {
+  if (/^\s*--(upload|receive)-pack/.test(arg)) {
+    throw new GitPluginError(void 0, "unsafe", `Use of --upload-pack or --receive-pack is not permitted without enabling allowUnsafePack`);
+  }
+  if (method === "clone" && /^\s*-u\b/.test(arg)) {
+    throw new GitPluginError(void 0, "unsafe", `Use of clone with option -u is not permitted without enabling allowUnsafePack`);
+  }
+  if (method === "push" && /^\s*--exec\b/.test(arg)) {
+    throw new GitPluginError(void 0, "unsafe", `Use of push with option --exec is not permitted without enabling allowUnsafePack`);
+  }
+}
 function blockUnsafeOperationsPlugin({
-  allowUnsafeProtocolOverride = false
+  allowUnsafeProtocolOverride = false,
+  allowUnsafePack = false
 } = {}) {
   return {
     type: "spawn.args",
-    action(args, _context) {
+    action(args, context) {
       args.forEach((current, index) => {
         const next = index < args.length ? args[index + 1] : "";
         allowUnsafeProtocolOverride || preventProtocolOverride(current, next);
+        allowUnsafePack || preventUploadPack(current, context.method);
       });
       return args;
     }
@@ -9340,6 +9646,34 @@ var init_change_working_directory = __esm({
   }
 });
 
+// src/lib/tasks/checkout.ts
+function checkoutTask(args) {
+  const commands = ["checkout", ...args];
+  if (commands[1] === "-b" && commands.includes("-B")) {
+    commands[1] = remove(commands, "-B");
+  }
+  return straightThroughStringTask(commands);
+}
+function checkout_default() {
+  return {
+    checkout() {
+      return this._runTask(checkoutTask(getTrailingOptions(arguments, 1)), trailingFunctionArgument(arguments));
+    },
+    checkoutBranch(branchName, startPoint) {
+      return this._runTask(checkoutTask(["-b", branchName, startPoint, ...getTrailingOptions(arguments)]), trailingFunctionArgument(arguments));
+    },
+    checkoutLocalBranch(branchName) {
+      return this._runTask(checkoutTask(["-b", branchName, ...getTrailingOptions(arguments)]), trailingFunctionArgument(arguments));
+    }
+  };
+}
+var init_checkout = __esm({
+  "src/lib/tasks/checkout.ts"() {
+    init_utils();
+    init_task();
+  }
+});
+
 // src/lib/parsers/parse-commit.ts
 function parseCommitResult(stdOut) {
   const result = {
@@ -9395,11 +9729,6 @@ var init_parse_commit = __esm({
 });
 
 // src/lib/tasks/commit.ts
-var commit_exports = {};
-__export(commit_exports, {
-  commitTask: () => commitTask,
-  default: () => commit_default
-});
 function commitTask(message, files, customArgs) {
   const commands = [
     "-c",
@@ -10428,6 +10757,7 @@ var init_simple_git_api = __esm({
   "src/lib/simple-git-api.ts"() {
     init_task_callback();
     init_change_working_directory();
+    init_checkout();
     init_commit();
     init_config();
     init_grep();
@@ -10502,7 +10832,7 @@ var init_simple_git_api = __esm({
         return this._runTask(statusTask(getTrailingOptions(arguments)), trailingFunctionArgument(arguments));
       }
     };
-    Object.assign(SimpleGitApi.prototype, commit_default(), config_default(), grep_default(), log_default(), version_default());
+    Object.assign(SimpleGitApi.prototype, checkout_default(), commit_default(), config_default(), grep_default(), log_default(), version_default());
   }
 });
 
@@ -11228,7 +11558,6 @@ var require_git = __commonJS({
     var { checkIsRepoTask: checkIsRepoTask2 } = (init_check_is_repo(), __toCommonJS(check_is_repo_exports));
     var { cloneTask: cloneTask2, cloneMirrorTask: cloneMirrorTask2 } = (init_clone(), __toCommonJS(clone_exports));
     var { cleanWithOptionsTask: cleanWithOptionsTask2, isCleanOptionsArray: isCleanOptionsArray2 } = (init_clean(), __toCommonJS(clean_exports));
-    var { commitTask: commitTask2 } = (init_commit(), __toCommonJS(commit_exports));
     var { diffSummaryTask: diffSummaryTask2 } = (init_diff(), __toCommonJS(diff_exports));
     var { fetchTask: fetchTask2 } = (init_fetch(), __toCommonJS(fetch_exports));
     var { moveTask: moveTask2 } = (init_move(), __toCommonJS(move_exports));
@@ -11326,16 +11655,6 @@ var require_git = __commonJS({
     };
     Git2.prototype.addAnnotatedTag = function(tagName, tagMessage) {
       return this._runTask(addAnnotatedTagTask2(tagName, tagMessage), trailingFunctionArgument2(arguments));
-    };
-    Git2.prototype.checkout = function() {
-      const commands = ["checkout", ...getTrailingOptions2(arguments, true)];
-      return this._runTask(straightThroughStringTask2(commands), trailingFunctionArgument2(arguments));
-    };
-    Git2.prototype.checkoutBranch = function(branchName, startPoint, then) {
-      return this.checkout(["-b", branchName, startPoint], trailingFunctionArgument2(arguments));
-    };
-    Git2.prototype.checkoutLocalBranch = function(branchName, then) {
-      return this.checkout(["-b", branchName], trailingFunctionArgument2(arguments));
     };
     Git2.prototype.deleteLocalBranch = function(branchName, forceDelete, then) {
       return this._runTask(deleteBranchTask2(branchName, typeof forceDelete === "boolean" ? forceDelete : false), trailingFunctionArgument2(arguments));
@@ -14904,6 +15223,30 @@ module.exports = require("net");
 
 /***/ }),
 
+/***/ 7718:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:child_process");
+
+/***/ }),
+
+/***/ 7561:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:fs");
+
+/***/ }),
+
+/***/ 9411:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:path");
+
+/***/ }),
+
 /***/ 2037:
 /***/ ((module) => {
 
@@ -15022,149 +15365,12 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
-"use strict";
-var exports = __webpack_exports__;
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core_1 = __nccwpck_require__(2186);
-const github_1 = __nccwpck_require__(5438);
-const child_process_1 = __nccwpck_require__(2081);
-const path_1 = __nccwpck_require__(1017);
-const simple_git_1 = __nccwpck_require__(9103);
-const https_1 = __nccwpck_require__(5687);
-const fs_1 = __nccwpck_require__(7147);
-(async () => {
-    // check if the runner operating system is windows
-    if (process.platform !== 'win32') {
-        (0, core_1.error)('This action only works on Windows.');
-        process.exit(1);
-    }
-    // get the inputs from the action
-    const pkgid = (0, core_1.getInput)('identifier');
-    const version = (0, core_1.getInput)('version');
-    const instRegex = (0, core_1.getInput)('installers-regex');
-    const releaseRepository = (0, core_1.getInput)('release-repository');
-    const releaseTag = (0, core_1.getInput)('release-tag');
-    const delPrevVersion = (0, core_1.getBooleanInput)('delete-previous-version');
-    const token = (0, core_1.getInput)('token');
-    const forkUser = (0, core_1.getInput)('fork-user');
-    // install powershell-yaml, clone winget-pkgs repo and configure remotes, update yamlcreate, and
-    // download wingetdev from vedantmgoyal2009/vedantmgoyal2009 (winget-pkgs-automation)
-    (0, core_1.info)(`::group::Install powershell-yaml, clone winget-pkgs and configure remotes, update YamlCreate, download wingetdev...`);
-    (0, child_process_1.execSync)(`Install-Module -Name powershell-yaml -Repository PSGallery -Scope CurrentUser -Force`, { shell: 'pwsh', stdio: 'inherit' });
-    // remove winget-pkgs directory if it exists, in case the action is ran multiple times for
-    // publishing multiple packages in the same workflow
-    if ((0, fs_1.existsSync)('winget-pkgs')) {
-        (0, fs_1.rmSync)('winget-pkgs', { recursive: true, force: true });
-    }
-    const remote = `https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git`;
-    const modifiedYamlCreate = 'https://github.com/vedantmgoyal2009/winget-releaser/raw/${process.env.GITHUB_ACTION_REF}/src/YamlCreate.ps1';
-    const git = (0, simple_git_1.simpleGit)();
-    git
-        .clone(remote)
-        .cwd('winget-pkgs')
-        .addConfig('user.name', 'github-actions', false, 'local')
-        .addConfig('user.email', '41898282+github-actions[bot]@users.noreply.github.com', false, 'local')
-        .remote(['rename', 'origin', 'upstream'])
-        .addRemote('origin', `https://github.com/${forkUser}/winget-pkgs.git`)
-        .exec(() => {
-        (0, https_1.request)(modifiedYamlCreate).pipe((0, fs_1.createWriteStream)('Tools\\YamlCreate.ps1'));
-    })
-        .commit('Update YamlCreate.ps1');
-    (0, child_process_1.execSync)(`svn checkout https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/tools/wingetdev`, { stdio: 'inherit' });
-    (0, core_1.info)(`::endgroup::`);
-    // resolve wingetdev path (./wingetdev/wingetdev.exe)
-    process.env.WINGETDEV = (0, path_1.resolve)('wingetdev', 'wingetdev.exe');
-    // get only data, and exclude status, url, and headers
-    const releaseInfo = {
-        ...(await (0, github_1.getOctokit)(token).rest.repos.getReleaseByTag({
-            owner: github_1.context.repo.owner,
-            // https://github.blog/changelog/2022-09-27-github-actions-additional-information-available-in-github-event-payload-for-scheduled-workflow-runs
-            repo: releaseRepository,
-            tag: releaseTag,
-        })).data,
-    };
-    (0, core_1.info)(`::group::Update manifests and create pull request`);
-    (0, child_process_1.execSync)(`.\\YamlCreate.ps1 \'${JSON.stringify({
-        PackageIdentifier: pkgid,
-        PackageVersion: version || new RegExp(/(?<=v).*/g).exec(releaseInfo.tag_name)[0],
-        InstallerUrls: releaseInfo.assets
-            .filter((asset) => {
-            return new RegExp(instRegex, 'g').test(asset.name);
-        })
-            .map((asset) => {
-            return asset.browser_download_url;
-        }),
-        ReleaseNotesUrl: releaseInfo.html_url,
-        ReleaseDate: new Date(releaseInfo.published_at)
-            .toISOString()
-            .slice(0, 10),
-        DeletePreviousVersion: delPrevVersion,
-    })}\'`, {
-        cwd: 'winget-pkgs/Tools',
-        shell: 'pwsh',
-        stdio: 'inherit',
-        env: { ...process.env, GH_TOKEN: token }, // set GH_TOKEN env variable for GitHub CLI (gh)
-    });
-    (0, core_1.info)(`::endgroup::`);
-    (0, core_1.info)(`::group::Checking for action updates...`);
-    // check if action version is a version (starts with `v`) and not a pinned commit ref
-    if (/^v\d+$/g.test(process.env.GITHUB_ACTION_REF)) {
-        const latestVersion = (await (0, github_1.getOctokit)(token).rest.repos.getLatestRelease({
-            owner: 'vedantmgoyal2009',
-            repo: 'winget-releaser',
-        })).data.tag_name;
-        (0, core_1.info)(`Current action version: ${process.env.GITHUB_ACTION_REF}`);
-        (0, core_1.info)(`Latest version found: ${latestVersion}`);
-        // if the latest version is greater than the current version, then update the action
-        if (latestVersion > process.env.GITHUB_ACTION_REF) {
-            git
-                .clone(`https://x-access-token:${token}@github.com/${process.env.GITHUB_REPOSITORY}.git`)
-                .cwd(process.env.GITHUB_REPOSITORY.split('/')[1])
-                .addConfig('user.name', 'github-actions', false, 'local')
-                .addConfig('user.email', '41898282+github-actions[bot]@users.noreply.github.com', false, 'local')
-                .exec(() => {
-                (0, child_process_1.execSync)(`find -name '*.yml' -or -name '*.yaml' -exec sed -i 's/vedantmgoyal2009\\/winget-releaser@${process.env.GITHUB_ACTION_REF}/vedantmgoyal2009\\/winget-releaser@${latestVersion}/g' {} +`, {
-                    stdio: 'inherit',
-                    cwd: `${process.env.GITHUB_REPOSITORY.split('/')[1]}/.github/workflows`,
-                    shell: 'bash',
-                });
-            })
-                .commit(`ci(winget-releaser): update action from ${process.env.GITHUB_ACTION_REF} to ${latestVersion}`)
-                .branch(['-c', `winget-releaser/update-to-${latestVersion}`])
-                .push([
-                '--force-with-lease',
-                '--set-upstream',
-                'origin',
-                `winget-releaser/update-to-${latestVersion}`,
-            ]);
-            (0, child_process_1.execSync)(`@\"
-This PR was automatically created by the [WinGet Releaser GitHub Action](https://github.com/vedantmgoyal2009/winget-releaser) to update the action version from \`${process.env.GITHUB_ACTION_REF}\` to \`${latestVersion}\`.\`r\`n
-The auto-update function help maintainers keep their workflows up-to-date with the latest version of the action.\`r\`n
-You can close this pull request if you don't want to update the action version.\`r\`n
-Mentioning @vedantmgoyal2009 for a second pair of eyes, in case any breaking changes have been introduced in the new version of the action.
-\"@ | gh pr create --fill --body-file -`, {
-                stdio: 'inherit',
-                cwd: process.env.GITHUB_REPOSITORY.split('/')[1],
-                shell: 'pwsh',
-                env: { ...process.env, GH_TOKEN: token }, // set GH_TOKEN env variable for GitHub CLI (gh)
-            });
-        }
-        else {
-            (0, core_1.info)(`No updates found. Bye bye!`);
-        }
-    }
-    else {
-        (0, core_1.info)(`The workflow maintainer has pinned the action to a commit ref. Skipping update check...`);
-    }
-    (0, core_1.info)(`::endgroup::`);
-})();
-
-})();
-
-module.exports = __webpack_exports__;
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __nccwpck_require__(5496);
+/******/ 	module.exports = __webpack_exports__;
+/******/ 	
 /******/ })()
 ;
