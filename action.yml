@@ -11,10 +11,10 @@ inputs:
     required: true
     description: The regex to match the installers.
     default: '.(exe|msi|msix|appx)(bundle){0,1}$'
-  delete-previous-version:
+  max-versions-to-keep:
     required: true
-    description: Whether to delete the last version.
-    default: 'false'
+    description: 'The maximum number of versions to keep in WinGet Community Repository (Default: 0 - no limit)'
+    default: '0'
   release-repository:
     required: true
     description: The repository where the release is present (should be present under same user/organization).
