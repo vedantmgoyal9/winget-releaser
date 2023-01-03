@@ -1,10 +1,12 @@
-import { error, getBooleanInput, getInput, info } from '@actions/core';
+import { endGroup, error, getInput, startGroup } from '@actions/core';
 import { context, getOctokit } from '@actions/github';
-import { execSync } from 'child_process';
-import { resolve } from 'path';
+import { execSync } from 'node:child_process';
+import { join } from 'node:path';
 import { SimpleGit, simpleGit } from 'simple-git';
-import { request } from 'https';
-import { createWriteStream, existsSync, rmSync } from 'fs';
+import updateManifests from './update-manifest';
+import checkActionUpdateAndCreatePR from './action-updater';
+import { getPackageVersions } from './utils';
+import { copyFileSync, existsSync, rmSync } from 'node:fs';
 
 (async () => {
   // check if the runner operating system is windows
@@ -19,32 +21,46 @@ import { createWriteStream, existsSync, rmSync } from 'fs';
   const instRegex = getInput('installers-regex');
   const releaseRepository = getInput('release-repository');
   const releaseTag = getInput('release-tag');
-  const delPrevVersion = getBooleanInput('delete-previous-version');
+  const maxVersionsToKeep = Number(getInput('max-versions-to-keep'));
   const token = getInput('token');
   const forkUser = getInput('fork-user');
 
-  // install powershell-yaml, clone winget-pkgs repo and configure remotes, update yamlcreate, and
-  // download wingetdev from vedantmgoyal2009/vedantmgoyal2009 (winget-pkgs-automation)
-  info(
-    `::group::Install powershell-yaml, clone winget-pkgs and configure remotes, update YamlCreate, download wingetdev...`,
-  );
-  execSync(
-    `Install-Module -Name powershell-yaml -Repository PSGallery -Scope CurrentUser -Force`,
-    { shell: 'pwsh', stdio: 'inherit' },
-  );
+  const git: SimpleGit = simpleGit();
+  const github = getOctokit(token);
 
-  // remove winget-pkgs directory if it exists, in case the action is ran multiple times for
-  // publishing multiple packages in the same workflow
+  // check if at least one version of the package is already present in winget-pkgs repository
+  fetch(
+    `https://github.com/microsoft/winget-pkgs/tree/master/manifests/${pkgid[0].toLowerCase()}/${pkgid}`,
+  ).then((res) => {
+    if (!res.ok) {
+      error(
+        `Package ${pkgid} does not exist in the winget-pkgs repository. Please add atleast one version of the package before using this action.`,
+      );
+      process.exit(1);
+    }
+  });
+
+  // check if max-versions-to-keep is a valid number and is 0 (keep all versions) or greater than 0
+  if (!Number.isInteger(maxVersionsToKeep) || maxVersionsToKeep < 0) {
+    error(
+      'Invalid input supplied: max-versions-to-keep should be 0 (zero - keep all versions) or a positive integer.',
+    );
+    process.exit(1);
+  }
+
+  // remove winget-pkgs directory if it exists (before cloning again), in case the action
+  // is ran multiple times for publishing multiple packages in the same workflow
+  // clone winget-pkgs repo, configure remotes, and fetch wingetdev from the repository
+  startGroup(
+    'Cloning winget-pkgs repository, configuring remotes, and fetching wingetdev...',
+  );
   if (existsSync('winget-pkgs')) {
     rmSync('winget-pkgs', { recursive: true, force: true });
   }
-  const remote = `https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git`;
-  const modifiedYamlCreate =
-    'https://github.com/vedantmgoyal2009/winget-releaser/raw/${process.env.GITHUB_ACTION_REF}/src/YamlCreate.ps1';
-  const git: SimpleGit = simpleGit();
-
   git
-    .clone(remote)
+    .clone(
+      `https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git`,
+    )
     .cwd('winget-pkgs')
     .addConfig('user.name', 'github-actions', false, 'local')
     .addConfig(
@@ -54,133 +70,105 @@ import { createWriteStream, existsSync, rmSync } from 'fs';
       'local',
     )
     .remote(['rename', 'origin', 'upstream'])
-    .addRemote('origin', `https://github.com/${forkUser}/winget-pkgs.git`)
-    .exec(() => {
-      request(modifiedYamlCreate).pipe(
-        createWriteStream('Tools\\YamlCreate.ps1'),
-      );
-    })
-    .commit('Update YamlCreate.ps1');
-
+    .addRemote('origin', `https://github.com/${forkUser}/winget-pkgs.git`);
   execSync(
-    `svn checkout https://github.com/vedantmgoyal2009/vedantmgoyal2009/trunk/tools/wingetdev`,
+    `svn checkout https://github.com/vedantmgoyal2009/winget-releaser/trunk/wingetdev`,
     { stdio: 'inherit' },
   );
-  info(`::endgroup::`);
+  endGroup();
 
-  // resolve wingetdev path (./wingetdev/wingetdev.exe)
-  process.env.WINGETDEV = resolve('wingetdev', 'wingetdev.exe');
-
-  // get only data, and exclude status, url, and headers
   const releaseInfo = {
     ...(
-      await getOctokit(token).rest.repos.getReleaseByTag({
+      await github.rest.repos.getReleaseByTag({
         owner: context.repo.owner,
-        // https://github.blog/changelog/2022-09-27-github-actions-additional-information-available-in-github-event-payload-for-scheduled-workflow-runs
-        repo: releaseRepository, // || context.repo.repo,
+        repo: releaseRepository,
         tag: releaseTag,
       })
-    ).data,
+    ).data, // get only data, and exclude status, url, and headers
   };
-
-  info(`::group::Update manifests and create pull request`);
-  execSync(
-    `.\\YamlCreate.ps1 \'${JSON.stringify({
-      PackageIdentifier: pkgid,
-      PackageVersion:
-        version || new RegExp(/(?<=v).*/g).exec(releaseInfo.tag_name)![0],
-      InstallerUrls: releaseInfo.assets
-        .filter((asset) => {
-          return new RegExp(instRegex, 'g').test(asset.name);
-        })
-        .map((asset) => {
-          return asset.browser_download_url;
-        }),
-      ReleaseNotesUrl: releaseInfo.html_url,
-      ReleaseDate: new Date(releaseInfo.published_at!)
-        .toISOString()
-        .slice(0, 10),
-      DeletePreviousVersion: delPrevVersion,
-    })}\'`,
-    {
-      cwd: 'winget-pkgs/Tools',
-      shell: 'pwsh',
-      stdio: 'inherit',
-      env: { ...process.env, GH_TOKEN: token }, // set GH_TOKEN env variable for GitHub CLI (gh)
-    },
+  const pkgDir = join(
+    process.cwd(),
+    'winget-pkgs',
+    'manifests',
+    `${pkgid[0].toLowerCase()}`,
+    `${pkgid.replace('.', '/')}`,
   );
-  info(`::endgroup::`);
+  let existingVersions = await getPackageVersions(pkgid);
+  copyFileSync(join(pkgDir, existingVersions[0]), join(pkgDir, version));
 
-  info(`::group::Checking for action updates...`);
-  // check if action version is a version (starts with `v`) and not a pinned commit ref
-  if (/^v\d+$/g.test(process.env.GITHUB_ACTION_REF!)) {
-    const latestVersion = (
-      await getOctokit(token).rest.repos.getLatestRelease({
-        owner: 'vedantmgoyal2009',
-        repo: 'winget-releaser',
+  startGroup('Updating manifests and creating pull request...');
+  await updateManifests({
+    installerUrls: releaseInfo.assets
+      .filter((asset) => {
+        return new RegExp(instRegex, 'g').test(asset.name);
       })
-    ).data.tag_name;
-
-    info(`Current action version: ${process.env.GITHUB_ACTION_REF}`);
-    info(`Latest version found: ${latestVersion}`);
-
-    // if the latest version is greater than the current version, then update the action
-    if (latestVersion > process.env.GITHUB_ACTION_REF!) {
-      git
-        .clone(
-          `https://x-access-token:${token}@github.com/${process.env.GITHUB_REPOSITORY}.git`,
-        )
-        .cwd(process.env.GITHUB_REPOSITORY!.split('/')[1])
-        .addConfig('user.name', 'github-actions', false, 'local')
-        .addConfig(
-          'user.email',
-          '41898282+github-actions[bot]@users.noreply.github.com',
-          false,
-          'local',
-        )
-        .exec(() => {
-          execSync(
-            `find -name '*.yml' -or -name '*.yaml' -exec sed -i 's/vedantmgoyal2009\\/winget-releaser@${process.env.GITHUB_ACTION_REF}/vedantmgoyal2009\\/winget-releaser@${latestVersion}/g' {} +`,
-            {
-              stdio: 'inherit',
-              cwd: `${
-                process.env.GITHUB_REPOSITORY!.split('/')[1]
-              }/.github/workflows`,
-              shell: 'bash',
-            },
-          );
-        })
-        .commit(
-          `ci(winget-releaser): update action from ${process.env.GITHUB_ACTION_REF} to ${latestVersion}`,
-        )
-        .branch(['-c', `winget-releaser/update-to-${latestVersion}`])
-        .push([
-          '--force-with-lease',
-          '--set-upstream',
-          'origin',
-          `winget-releaser/update-to-${latestVersion}`,
-        ]);
-      execSync(
-        `@\"
-This PR was automatically created by the [WinGet Releaser GitHub Action](https://github.com/vedantmgoyal2009/winget-releaser) to update the action version from \`${process.env.GITHUB_ACTION_REF}\` to \`${latestVersion}\`.\`r\`n
-The auto-update function help maintainers keep their workflows up-to-date with the latest version of the action.\`r\`n
-You can close this pull request if you don't want to update the action version.\`r\`n
-Mentioning @vedantmgoyal2009 for a second pair of eyes, in case any breaking changes have been introduced in the new version of the action.
-\"@ | gh pr create --fill --body-file -`,
-        {
-          stdio: 'inherit',
-          cwd: process.env.GITHUB_REPOSITORY!.split('/')[1],
-          shell: 'pwsh',
-          env: { ...process.env, GH_TOKEN: token }, // set GH_TOKEN env variable for GitHub CLI (gh)
-        },
-      );
-    } else {
-      info(`No updates found. Bye bye!`);
-    }
-  } else {
-    info(
-      `The workflow maintainer has pinned the action to a commit ref. Skipping update check...`,
+      .map((asset) => {
+        return asset.browser_download_url;
+      }),
+    packageVersion: version,
+    releaseDate: new Date(releaseInfo.published_at!).toISOString().slice(0, 10),
+    releaseNotesUrl: releaseInfo.html_url,
+    manifestVersion: '1.2.0',
+    packageDir: pkgDir,
+  });
+  git
+    .cwd('winget-pkgs')
+    .fetch('upstream', 'master')
+    .checkoutLocalBranch(`HEAD:${pkgid}-v${version}`)
+    .add('.')
+    .commit(`New version: ${pkgid} version ${version}`)
+    .push('origin', `HEAD:${pkgid}-v${version}`)
+    .exec(
+      async () =>
+        await github.rest.pulls.create({
+          owner: 'microsoft',
+          repo: 'winget-pkgs',
+          title: `New version: ${pkgid} version ${version}`,
+          head: `${forkUser}:${pkgid}-v${version}`,
+          base: 'master',
+          body: '### Pull request has been automatically created using 🛫 [WinGet Releaser](https://github.com/vedantmgoyal2009/winget-releaser).',
+        }),
     );
+  endGroup();
+
+  if (
+    maxVersionsToKeep !== 0 &&
+    existingVersions.length + 1 > maxVersionsToKeep
+  ) {
+    startGroup('Deleting old versions...');
+    for (let iterator = 0; iterator < maxVersionsToKeep; iterator++)
+      existingVersions.shift();
+    existingVersions.forEach((version) =>
+      git
+        .cwd('winget-pkgs')
+        .fetch('upstream', 'master')
+        .checkoutLocalBranch(`HEAD:${pkgid}-v${version}-REMOVE`)
+        .exec(() => {
+          if (existsSync(join(pkgDir, version)))
+            rmSync(join(pkgDir, version), { recursive: true, force: true });
+        })
+        .add('.')
+        .commit(`Remove: ${pkgid} version ${version}`)
+        .push('origin', `HEAD:${pkgid}-v${version}-REMOVE`)
+        .exec(
+          async () =>
+            await github.rest.pulls.create({
+              owner: 'microsoft',
+              repo: 'winget-pkgs',
+              title: `Remove: ${pkgid} version ${version}`,
+              head: `${forkUser}:${pkgid}-v${version}-REMOVE`,
+              base: 'master',
+              body:
+                '#### Reason for removal: This version is older than what has been set in `max-versions-to-keep` by the publisher.\n\n' +
+                '###### Pull request has been automatically created using 🛫 [WinGet Releaser](https://github.com/vedantmgoyal2009/winget-releaser).',
+            }),
+        ),
+    );
+    endGroup();
   }
-  info(`::endgroup::`);
+
+  // check for action updates, and create a pull request if there are any
+  startGroup('Checking for action updates...');
+  await checkActionUpdateAndCreatePR(token);
+  endGroup();
 })();

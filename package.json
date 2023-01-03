@@ -2,14 +2,19 @@
   "name": "winget-releaser",
   "version": "1.0.0",
   "description": "Publish new releases of your application to Windows Package Manager easily.",
-  "main": "dist/index.js",
+  "main": "out/main.js",
   "scripts": {
-    "all": "npm run format && npm run build && rm src/main.js",
-    "format": "prettier --write src *.* .github",
-    "build": "tsc && ncc build src/main.js --license licenses.txt",
+    "all": "npm run format && npm run build",
+    "format": "prettier --write src *.* .github --ignore-unknown",
+    "prebuild": "rmdir /s /q dist",
+    "build": "tsc && ncc build --license licenses.txt",
+    "postbuild": "rmdir /s /q out",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "prettier": {
+    "arrowParens": "always",
+    "bracketSameLine": true,
+    "endOfLine": "lf",
     "trailingComma": "all",
     "tabWidth": 2,
     "semi": true,
@@ -37,6 +42,7 @@
     "simple-git": "^3.16.0"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.5",
     "@types/node": "^18.11.18",
     "@vercel/ncc": "^0.36.1",
     "prettier": "^2.8.3",
