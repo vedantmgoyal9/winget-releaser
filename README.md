@@ -32,9 +32,7 @@ expediting the amount of time it takes for a submission to be reviewed.
 
 - Give `workflow` permission to the token you created in Step 1. This will allow the action to automatically update your
   fork with the upstream repository.
-- You can use *
-  *[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]
-  ** which keeps your fork up-to-date with the upstream repository via automated pull requests.
+- You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date with the upstream repository via automated pull requests.
 
 4. Add this action to a GitHub Actions Workflow on your project:
 
@@ -59,7 +57,7 @@ expediting the amount of time it takes for a submission to be reviewed.
 name: Publish to WinGet
 on:
   release:
-    types: [ released ]
+    types: [released]
 jobs:
   publish:
     # Action can only be run on windows
@@ -78,7 +76,7 @@ jobs:
 name: Publish to WinGet
 on:
   release:
-    types: [ released ]
+    types: [released]
 jobs:
   publish:
     runs-on: windows-latest
@@ -103,7 +101,7 @@ jobs:
 name: Publish to WinGet
 on:
   release:
-    types: [ released ]
+    types: [released]
 jobs:
   publish:
     runs-on: windows-latest
@@ -129,7 +127,7 @@ jobs:
 name: Publish to WinGet
 on:
   release:
-    types: [ released ]
+    types: [released]
 jobs:
   publish:
     runs-on: windows-latest
