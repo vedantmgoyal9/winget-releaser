@@ -41,7 +41,7 @@
     "simple-git": "^3.16.0"
   },
   "devDependencies": {
-    "@types/node": "^18.11.18",
+    "@types/node": "^18.11.19",
     "@types/node-fetch": "^2.6.2",
     "@vercel/ncc": "^0.36.1",
     "prettier": "^2.8.3",
