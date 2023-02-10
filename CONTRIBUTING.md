@@ -21,6 +21,6 @@ Ensure you've read through the documentation so you understand the core concepts
 2. Create a new branch to work on: `git checkout -b <some-branch-name>`
 3. Commit changes by using: `git commit -m 'feat: <short description about the feature>'`
 4. Push branch to your fork: `git push origin <some-branch-name>`
-5. Finally, create a pull request to the main repository
-6. Wait for the PR to be reviewed and merged by the maintainers
+5. Finally, create a pull request to the main repository.
+6. Wait for the PR to be reviewed and merged by the maintainers.
 7. Congratulations! Your name will be shown on the README.md file :tada:
