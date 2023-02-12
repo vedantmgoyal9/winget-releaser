@@ -42,14 +42,14 @@ jobs:
             }
 
             // get latest commit sha and tree sha of the main branch
-            const {data: {commit: {sha: commitSha, commit: {tree: {sha: treeSha}}}}} = await github.rest.repos.getBranch({
+            const {data: {commit: {sha: mainBranchCommitSha, commit: {tree: {sha: mainBranchTreeSha}}}}} = await github.rest.repos.getBranch({
               owner: 'vedantmgoyal2009',
               repo: 'winget-releaser',
               branch: 'main'
             })
 
             // create tree with the updated files
-            const {data: {sha: treeShaOfUpdatedFiles}} = await github.rest.git.createTree({
+            const {data: {sha: treeShaWithUpdatedFiles}} = await github.rest.git.createTree({
               owner: 'vedantmgoyal2009',
               repo: 'winget-releaser',
               tree: [
@@ -66,24 +66,36 @@ jobs:
                   content: replaceUrl(dist_indexJs)
                 }
               ],
-              base_tree: treeSha
+              base_tree: mainBranchTreeSha
             })
 
             // create commit with the updated tree
-            const {data: {sha: commitShaOfUpdatedFiles}} = await github.rest.git.createCommit({
+            const {data: {sha: commitShaWithUpdatedFiles}} = await github.rest.git.createCommit({
               owner: 'vedantmgoyal2009',
               repo: 'winget-releaser',
               message: `Update Komac to ${tagName}`,
-              tree: treeShaOfUpdatedFiles,
-              parents: [commitSha]
+              tree: treeShaWithUpdatedFiles,
+              parents: [mainBranchCommitSha]
             })
 
             // update the main branch with the new commit
-            await github.rest.git.updateRef({
+            const {data: {sha: mainBranchNewSha}} = await github.rest.git.updateRef({
               owner: 'vedantmgoyal2009',
               repo: 'winget-releaser',
               ref: 'heads/main',
-              sha: commitShaOfUpdatedFiles
+              sha: commitShaWithUpdatedFiles
+            })
+
+            // update version tag with the main branch
+            await github.rest.git.updateRef({
+              owner: 'vedantmgoyal2009',
+              repo: 'winget-releaser',
+              ref: `tags/${(await github.rest.repos.getLatestRelease({
+                  owner: 'vedantmgoyal2009',
+                  repo: 'winget-releaser'
+                })).data.tag_name
+              }`,
+              sha: mainBranchNewSha
             })
 
             core.info('Updated Komac successfully.')
