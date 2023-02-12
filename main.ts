@@ -79,6 +79,7 @@ import { existsSync, rmSync } from 'node:fs';
     });
 
   // set github token environment variable, and execute komac to update the manifest and submit the pull request
+  process.env.KMC_CRTD_WITH = `WinGet Releaser ${process.env.GITHUB_ACTION_REF}`;
   process.env.GITHUB_TOKEN = token;
   execSync(
     `& $env:JAVA_HOME_17_X64\\bin\\java.exe -jar komac.jar update --id \'${pkgid}\' --version ${pkgVersion} --urls \'${installerUrls.join(
