@@ -89,6 +89,16 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "bostrot",
+      "name": "Eric Trenkel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7342321?v=4",
+      "profile": "http://erictrenkel.com",
+      "contributions": [
+        "financial",
+        "bug"
+      ]
     }
   ]
 }
