@@ -1,0 +1,92 @@
+name: Update Komac
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Komac
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fetch = require('node-fetch')
+
+            // get the latest release of Komac
+            const {data: {tag_name: tagName, html_url: htmlUrl}} = await github.rest.repos.getLatestRelease({
+              owner: 'russellbanks',
+              repo: 'Komac'
+            })
+
+            core.info(`Komac's latest version: ${tagName}`)
+
+            // get raw content of main.ts and dist/index.js
+            const [mainTs, dist_indexJs] = await Promise.all([
+              fetch('https://raw.githubusercontent.com/vedantmgoyal2009/winget-releaser/main/main.ts').then(res => res.text()),
+              fetch('https://raw.githubusercontent.com/vedantmgoyal2009/winget-releaser/main/dist/index.js').then(res => res.text())
+            ])
+
+            // check if action is already using the latest version
+            const komacVersionInMainTs = mainTs.match(/Komac-[0-9.]+-all\.jar/)[0]
+            core.info(`Komac version in main.ts: ${komacVersionInMainTs}`)
+            if (tagName === komacVersionInMainTs && dist_indexJs.includes(`Komac-${tagName}-all.jar`)) {
+              core.info('No need to update.')
+              return
+            }
+            core.info('Updating komac in main.ts and dist/index.js...')
+
+            // function to replace the url in the main.ts and dist/index.js
+            function replaceUrl (text) {
+              return text.replace(/https:\/\/github\.com\/russellbanks\/Komac\/releases\/download\/v[0-9.]+\/Komac-[0-9.]+-all\.jar/g, htmlUrl)
+            }
+
+            // get latest commit sha and tree sha of the main branch
+            const {data: {commit: {sha: commitSha}, commit: {tree: {sha: treeSha}}}} = await github.rest.rest.repos.getBranch({
+              owner: 'vedantmgoyal2009',
+              repo: 'winget-releaser',
+              branch: 'main'
+            })
+
+            // create tree with the updated files
+            const {data: {sha: treeShaOfUpdatedFiles}} = await github.rest.git.createTree({
+              owner: 'vedantmgoyal2009',
+              repo: 'winget-releaser',
+              tree: [
+                {
+                  path: 'main.ts',
+                  mode: '100644',
+                  type: 'blob',
+                  content: replaceUrl(mainTs)
+                },
+                {
+                  path: 'dist/index.js',
+                  mode: '100644',
+                  type: 'blob',
+                  content: replaceUrl(dist_indexJs)
+                }
+              ],
+              base_tree: treeSha
+            })
+
+            // create commit with the updated tree
+            const {data: {sha: commitShaOfUpdatedFiles}} = await github.rest.git.createCommit({
+              owner: 'vedantmgoyal2009',
+              repo: 'winget-releaser',
+              message: `Update Komac to ${tagName}`,
+              tree: treeShaOfUpdatedFiles,
+              parents: [commitSha]
+            })
+
+            // update the main branch with the new commit
+            await github.rest.git.updateRef({
+              owner: 'vedantmgoyal2009',
+              repo: 'winget-releaser',
+              ref: 'refs/heads/main',
+              sha: commitShaOfUpdatedFiles
+            })
+
+            core.info('Updated Komac successfully.')
+            core.info(`Bye bye! 👋`)
