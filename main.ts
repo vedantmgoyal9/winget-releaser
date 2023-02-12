@@ -162,7 +162,7 @@ import { existsSync, rmSync } from 'node:fs';
     endGroup();
 
     startGroup('Deleting old versions...');
-    // build the path to the package directory (e.g. winget-pkgs/manifests/m/Microsoft/OneDrive)
+    // build the path to the package directory (e.g. manifests/m/Microsoft/OneDrive)
     const pkgDir = join(
       'manifests',
       `${pkgid[0].toLowerCase()}`,
