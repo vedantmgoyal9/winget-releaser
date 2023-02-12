@@ -10,17 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Update Komac
-        uses: actions/github-script@v6
+        uses: actions/github-script@v6.4.0
         with:
           script: |
-            const fetch = require('node-fetch')
-
             // get the latest release of Komac
-            const {data: {tag_name: tagName, html_url: htmlUrl}} = await github.rest.repos.getLatestRelease({
+            const {data: {tag_name: tagName, assets: [{browser_download_url: browserDownloadUrl}]}} = await github.rest.repos.getLatestRelease({
               owner: 'russellbanks',
               repo: 'Komac'
             })
-
+            const komacJarUrl = browserDownloadUrl.replace(/Komac-[0-9.]+-all\.jar/, `Komac-${tagName.slice(1)}-all.jar`)
             core.info(`Komac's latest version: ${tagName}`)
 
             // get raw content of main.ts and dist/index.js
@@ -30,21 +28,21 @@ jobs:
             ])
 
             // check if action is already using the latest version
-            const komacVersionInMainTs = mainTs.match(/Komac-[0-9.]+-all\.jar/)[0]
-            core.info(`Komac version in main.ts: ${komacVersionInMainTs}`)
-            if (tagName === komacVersionInMainTs && dist_indexJs.includes(`Komac-${tagName}-all.jar`)) {
+            core.info(`Komac version in main.ts: ${mainTs.match(/Komac-[0-9.]+-all\.jar/)[0]}`)
+            if (mainTs.includes(komacJarUrl) && dist_indexJs.includes(komacJarUrl)) {
               core.info('No need to update.')
+              core.info(`Bye bye! 👋`)
               return
             }
             core.info('Updating komac in main.ts and dist/index.js...')
 
             // function to replace the url in the main.ts and dist/index.js
             function replaceUrl (text) {
-              return text.replace(/https:\/\/github\.com\/russellbanks\/Komac\/releases\/download\/v[0-9.]+\/Komac-[0-9.]+-all\.jar/g, htmlUrl)
+              return text.replace(/https:\/\/github\.com\/russellbanks\/Komac\/releases\/download\/v[0-9.]+\/Komac-[0-9.]+-all\.jar/g, komacJarUrl)
             }
 
             // get latest commit sha and tree sha of the main branch
-            const {data: {commit: {sha: commitSha}, commit: {tree: {sha: treeSha}}}} = await github.rest.rest.repos.getBranch({
+            const {data: {commit: {sha: commitSha, commit: {tree: {sha: treeSha}}}}} = await github.rest.repos.getBranch({
               owner: 'vedantmgoyal2009',
               repo: 'winget-releaser',
               branch: 'main'
@@ -84,7 +82,7 @@ jobs:
             await github.rest.git.updateRef({
               owner: 'vedantmgoyal2009',
               repo: 'winget-releaser',
-              ref: 'refs/heads/main',
+              ref: 'heads/main',
               sha: commitShaOfUpdatedFiles
             })
 
