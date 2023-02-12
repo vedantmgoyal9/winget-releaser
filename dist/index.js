@@ -113,7 +113,7 @@ const node_fs_1 = __nccwpck_require__(7561);
         (0, node_child_process_1.execSync)(`git -C winget-pkgs remote add origin https://github.com/${forkUser}/winget-pkgs.git`, { stdio: 'inherit' });
         (0, core_1.endGroup)();
         (0, core_1.startGroup)('Deleting old versions...');
-        // build the path to the package directory (e.g. winget-pkgs/manifests/m/Microsoft/OneDrive)
+        // build the path to the package directory (e.g. manifests/m/Microsoft/OneDrive)
         const pkgDir = (0, node_path_1.join)('manifests', `${pkgid[0].toLowerCase()}`, `${pkgid.replace('.', '/')}`);
         // iterate over the left over versions and delete them
         existingVersions.forEach(async (version) => {
