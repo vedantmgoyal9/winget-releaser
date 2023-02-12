@@ -39,7 +39,8 @@
       "profile": "https://github.com/daiyam",
       "contributions": [
         "code",
-        "ideas"
+        "ideas",
+        "bug"
       ]
     },
     {
@@ -88,6 +89,15 @@
       "profile": "https://github.com/gerardog",
       "contributions": [
         "doc"
+      ]
+    },
+    {
+      "login": "chrisbra",
+      "name": "Christian Brabandt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/244927?v=4",
+      "profile": "http://blog.256bit.org",
+      "contributions": [
+        "bug"
       ]
     },
     {
