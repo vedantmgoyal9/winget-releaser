@@ -18,11 +18,10 @@ expediting the amount of time it takes for a submission to be reviewed.
 
 ## Getting Started 🚀
 
-1. Your application must first have at least one manifest in [WinGet Community Repository][winget-pkgs-repo]. This
-   action will take the latest existing manifest as a starting point for the new release. If you still haven't created
-   and uploaded a manifest, [do that first][create-manifest].
+1. Atleast **one** version of your package should already be present in the
+   [Windows Package Manager Community Repository][winget-pkgs-repo]. The action will use that version as a base to create manifests for new versions of the package.
 
-2. You will need to create a Personal Access Token (PAT) with `public_repo` scope.
+2. You will need to create a _classic_ Personal Access Token (PAT) with `public_repo` scope. _New_ fine-grained PATs can't access GitHub's GraphQL API, so they aren't supported by this action. Refer to https://github.com/cli/cli/issues/6680 for more information.
 
 <img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pat-scope.png" alt="Personal Access Token Required Scopes" />
 
@@ -32,18 +31,12 @@ expediting the amount of time it takes for a submission to be reviewed.
 
 - Give `workflow` permission to the token you created in Step 1. This will allow the action to automatically update your
   fork with the upstream repository.
-- You can use *
-  *[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]
-  ** which keeps your fork up-to-date with the upstream repository via automated pull requests.
+- You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date with the upstream repository via automated pull requests.
 
-4. Add this action to a GitHub Actions Workflow on your project:
+4. Add the action to your workflow file (e.g. `.github/workflows/<name>.yml`). Some quick & important points to note:
 
-- A simple and effective way is to **create a new workflow** that triggers on the [`release` event][release-event]
-  with [`released` Activity Type][release-activity-type], which means it will fire when a GitHub release is published,
-  or a pre-release is changed to a release.
-- Or you could add this action to an existing workflow, but please note that this action can't be used when the release
-  is in draft or unpublished status, simply because their binaries are not yet available for general download. The
-  release must be in **published**, **not-draft** status.
+- The action can only be run on Windows runners, so the job must run on `windows-latest`.
+- The action will only work when the release is **published** (not a draft), because the release assets (binaries) aren't available publicly until the release is published.
 
 ## Examples
 
@@ -59,7 +52,7 @@ expediting the amount of time it takes for a submission to be reviewed.
 name: Publish to WinGet
 on:
   release:
-    types: [ released ]
+    types: [released]
 jobs:
   publish:
     # Action can only be run on windows
@@ -68,6 +61,7 @@ jobs:
       - uses: vedantmgoyal2009/winget-releaser@v1
         with:
           identifier: Package.Identifier
+          max-versions-to-keep: 5 # keep only latest 5 versions
           token: ${{ secrets.WINGET_TOKEN }}
 ```
 
@@ -78,7 +72,7 @@ jobs:
 name: Publish to WinGet
 on:
   release:
-    types: [ released ]
+    types: [released]
 jobs:
   publish:
     runs-on: windows-latest
@@ -103,7 +97,7 @@ jobs:
 name: Publish to WinGet
 on:
   release:
-    types: [ released ]
+    types: [released]
 jobs:
   publish:
     runs-on: windows-latest
@@ -129,7 +123,7 @@ jobs:
 name: Publish to WinGet
 on:
   release:
-    types: [ released ]
+    types: [released]
 jobs:
   publish:
     runs-on: windows-latest
@@ -191,14 +185,14 @@ installers-regex: '\.exe$'
 ## '\.zip$'      -> All ZIP's
 ```
 
-### Delete Previous Version (delete-previous-version)
+### Maximum no. of versions to keep in the winget-pkgs repository (max-versions-to-keep)
 
-- Required: ❌ (Default value: `'false'`)
+- Required: ❌ (Default value: `0` - unlimited)
 
-Set this to true if you want to overwrite the previous version of the package with the latest version.
+The maximum number of versions of the package to keep in the [Windows Package Manager Community Repository][winget-pkgs-repo] repository. If after the current release, the number of versions exceeds this limit, the oldest version will be deleted.
 
 ```yaml
-delete-previous-version: 'true' # don't forget the quotes
+max-versions-to-keep: 5 # keep only the latest 5 versions
 ```
 
 ### Release tag (release-tag)
@@ -216,7 +210,7 @@ release-tag: ${{ inputs.version }} # workflow_dispatch input `version`
 - Required: ✅
 
 The GitHub token with which the action will authenticate with GitHub API and create a pull request on
-the [microsoft/winget-pkgs][winget-pkgs-repo] repository.
+the [Windows Package Manager Community Repository][winget-pkgs-repo] repository.
 
 ```yaml
 token: ${{ secrets.WINGET_TOKEN }} # Repository secret called 'WINGET_TOKEN'
@@ -224,14 +218,13 @@ token: ${{ secrets.WINGET_TOKEN }} # Repository secret called 'WINGET_TOKEN'
 
 #### The token should have the `public_repo` scope.
 
-> **Note** Do **not** directly put the token in the action. Instead, create a repository secret containing the token and
-> use that in the workflow. See [using encrypted secrets in a workflow][gh-encrypted-secrets] for more details.
+> **Note** Do **not** directly put the token in the action. Instead, create a repository secret containing the token and use that in the workflow. See [using encrypted secrets in a workflow][gh-encrypted-secrets] for more details.
 
 ### Use fork under which user (fork-user)
 
 - Required: ❌ (Default value: `${{ github.repository_owner }} # repository owner`)
 
-This is the GitHub username of the user where the fork of [microsoft/winget-pkgs][winget-pkgs-repo] is present. This
+This is the GitHub username of the user where the fork of [Windows Package Manager Community Repository][winget-pkgs-repo] is present. This
 fork will be used to create the pull request.
 
 ```yaml
@@ -281,6 +274,3 @@ Contributions of any kind welcome!
 [winget-pkgs-repo]: https://github.com/microsoft/winget-pkgs
 [pull-app-auto-update-forks]: https://github.com/wei/pull
 [gh-encrypted-secrets]: https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow
-[create-manifest]: https://learn.microsoft.com/windows/package-manager/package/
-[release-event]: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release
-[release-activity-type]: https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#release
