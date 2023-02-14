@@ -69,6 +69,8 @@ const node_fs_1 = __nccwpck_require__(7561);
         return asset.browser_download_url;
     });
     // set github token environment variable, and execute komac to update the manifest and submit the pull request
+    process.env.KMC_CRTD_WITH = `WinGet Releaser ${process.env.GITHUB_ACTION_REF}`;
+    process.env.KMC_FRK_OWNER = forkUser;
     process.env.GITHUB_TOKEN = token;
     (0, node_child_process_1.execSync)(`& $env:JAVA_HOME_17_X64\\bin\\java.exe -jar komac.jar update --id \'${pkgid}\' --version ${pkgVersion} --urls \'${installerUrls.join(',')}\' --submit`, {
         shell: 'pwsh',
