@@ -7,6 +7,8 @@ on:
 
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Update Komac
@@ -79,7 +81,7 @@ jobs:
             })
 
             // update the main branch with the new commit
-            const {data: {sha: mainBranchNewSha}} = await github.rest.git.updateRef({
+            const {data: {object: {sha: mainBranchNewSha}}} = await github.rest.git.updateRef({
               owner: 'vedantmgoyal2009',
               repo: 'winget-releaser',
               ref: 'heads/main',
