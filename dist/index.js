@@ -35,7 +35,7 @@ const node_fs_1 = __nccwpck_require__(7561);
     // check if at least one version of the package is already present in winget-pkgs repository
     (0, node_fetch_1.default)(`https://github.com/microsoft/winget-pkgs/tree/master/manifests/${pkgid
         .charAt(0)
-        .toLowerCase()}/${pkgid.replace('.', '/')}`, { method: 'HEAD' }).then((res) => {
+        .toLowerCase()}/${pkgid.replaceAll('.', '/')}`, { method: 'HEAD' }).then((res) => {
         if (!res.ok) {
             (0, core_1.error)(`Package ${pkgid} does not exist in the winget-pkgs repository. Please add atleast one version of the package before using this action.`);
             process.exit(1);

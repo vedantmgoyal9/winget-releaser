@@ -28,7 +28,7 @@ import { existsSync, rmSync } from 'node:fs';
   fetch(
     `https://github.com/microsoft/winget-pkgs/tree/master/manifests/${pkgid
       .charAt(0)
-      .toLowerCase()}/${pkgid.replace('.', '/')}`,
+      .toLowerCase()}/${pkgid.replaceAll('.', '/')}`,
     { method: 'HEAD' },
   ).then((res) => {
     if (!res.ok) {
