@@ -83,7 +83,7 @@ import { existsSync, rmSync } from 'node:fs';
   process.env.KMC_FRK_OWNER = forkUser;
   process.env.GITHUB_TOKEN = token;
   const command = `$env:JAVA_HOME_17_X64\\bin\\java.exe -jar komac.jar update --id \'${pkgid}\' --version ${pkgVersion} --urls \'${installerUrls.join(',') }\' --submit`;
-  console.log(`Executing command: java -jar ${command.split('java.exe -jar ')[1]}`);
+  info(`Executing command: java -jar ${command.split('java.exe -jar ')[1]}`);
   execSync(`& ${command}`, {
     shell: 'pwsh',
     stdio: 'inherit',
