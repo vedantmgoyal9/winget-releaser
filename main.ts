@@ -82,9 +82,9 @@ import { existsSync, rmSync } from 'node:fs';
   process.env.KMC_CRTD_WITH = `WinGet Releaser ${process.env.GITHUB_ACTION_REF}`;
   process.env.KMC_FRK_OWNER = forkUser;
   process.env.GITHUB_TOKEN = token;
-  const command = `& $env:JAVA_HOME_17_X64\\bin\\java.exe -jar komac.jar update --id \'${pkgid}\' --version ${pkgVersion} --urls \'${installerUrls.join(',') }\' --submit`;
-  console.log(`Executing command: ${command}`);
-  execSync(command, {
+  const command = `$env:JAVA_HOME_17_X64\\bin\\java.exe -jar komac.jar update --id \'${pkgid}\' --version ${pkgVersion} --urls \'${installerUrls.join(',') }\' --submit`;
+  console.log(`Executing command: java -jar ${command.split('java.exe -jar ')[1]}`);
+  execSync(`& ${command}`, {
     shell: 'pwsh',
     stdio: 'inherit',
   });
