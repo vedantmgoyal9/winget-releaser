@@ -82,15 +82,12 @@ import { existsSync, rmSync } from 'node:fs';
   process.env.KMC_CRTD_WITH = `WinGet Releaser ${process.env.GITHUB_ACTION_REF}`;
   process.env.KMC_FRK_OWNER = forkUser;
   process.env.GITHUB_TOKEN = token;
-  execSync(
-    `& $env:JAVA_HOME_17_X64\\bin\\java.exe -jar komac.jar update --id \'${pkgid}\' --version ${pkgVersion} --urls \'${installerUrls.join(
-      ',',
-    )}\' --submit`,
-    {
-      shell: 'pwsh',
-      stdio: 'inherit',
-    },
-  );
+  const command = `& $env:JAVA_HOME_17_X64\\bin\\java.exe -jar komac.jar update --id \'${pkgid}\' --version ${pkgVersion} --urls \'${installerUrls.join(',') }\' --submit`;
+  console.log(`Executing command: ${command}`);
+  execSync(command, {
+    shell: 'pwsh',
+    stdio: 'inherit',
+  });
   endGroup();
 
   // get the list of existing versions of the package using wingetdev
