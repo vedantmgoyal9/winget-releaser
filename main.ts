@@ -56,7 +56,7 @@ import { existsSync, rmSync } from 'node:fs';
 
   // fetch komac.jar from the latest release
   execSync(
-    `Invoke-WebRequest -Uri https://github.com/russellbanks/Komac/releases/download/v1.3.1/Komac-1.3.1-all.jar -OutFile komac.jar`,
+    `Invoke-WebRequest -Uri https://github.com/russellbanks/Komac/releases/download/v1.3.2/Komac-1.3.2-all.jar -OutFile komac.jar`,
     {
       shell: 'pwsh',
       stdio: 'inherit',
