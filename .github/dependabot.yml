@@ -12,9 +12,6 @@ updates:
       - dependency-type: all
     schedule:
       interval: 'daily'
-      timezone: 'Asia/Kolkata'
-    labels:
-      - 'dependencies'
     reviewers:
       - 'vedantmgoyal2009'
     commit-message:
@@ -28,9 +25,6 @@ updates:
     directory: '/'
     schedule:
       interval: 'daily'
-      timezone: 'Asia/Kolkata'
-    labels:
-      - 'dependencies'
     reviewers:
       - 'vedantmgoyal2009'
     commit-message:

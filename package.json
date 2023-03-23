@@ -6,9 +6,9 @@
   "scripts": {
     "all": "npm run format && npm run build",
     "format": "prettier --write *.* .github --ignore-unknown",
-    "prebuild": "rmdir /s /q dist",
+    "prebuild": "rm -r dist",
     "build": "tsc && ncc build --license licenses.txt",
-    "postbuild": "del /q main.js",
+    "postbuild": "rm main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "prettier": {

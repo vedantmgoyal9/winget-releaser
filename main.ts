@@ -1,4 +1,11 @@
-import { endGroup, error, getInput, startGroup, info } from '@actions/core';
+import {
+  endGroup,
+  error,
+  getInput,
+  startGroup,
+  info,
+  warning,
+} from '@actions/core';
 import { context, getOctokit } from '@actions/github';
 import { execSync } from 'node:child_process';
 import { join } from 'node:path';
@@ -82,7 +89,9 @@ import { existsSync, rmSync } from 'node:fs';
   process.env.KMC_CRTD_WITH = `WinGet Releaser ${process.env.GITHUB_ACTION_REF}`;
   process.env.KMC_FRK_OWNER = forkUser;
   process.env.GITHUB_TOKEN = token;
-  const command = `-jar komac.jar update --id \'${pkgid}\' --version ${pkgVersion} --urls \'${installerUrls.join(',') }\' --submit`;
+  const command = `-jar komac.jar update --id \'${pkgid}\' --version ${pkgVersion} --urls \'${installerUrls.join(
+    ',',
+  )}\' --submit`;
   info(`Executing command: java ${command}`);
   execSync(`& $env:JAVA_HOME_17_X64\\bin\\java.exe ${command}`, {
     shell: 'pwsh',
@@ -219,14 +228,6 @@ import { existsSync, rmSync } from 'node:fs';
 
   // check for action updates, and create a pull request if there are any
   startGroup('Checking for action updates...');
-  // check if action version is a version (starts with `v`) and not a pinned commit ref
-  if (!/^v\d+$/g.test(process.env.GITHUB_ACTION_REF!)) {
-    info(
-      `The workflow maintainer has pinned the action to a commit ref. Skipping update check...`,
-    );
-    process.exit(0);
-  }
-
   const latestVersion = (
     await github.rest.repos.getLatestRelease({
       owner: 'vedantmgoyal2009',
@@ -237,75 +238,12 @@ import { existsSync, rmSync } from 'node:fs';
   info(`Current action version: ${process.env.GITHUB_ACTION_REF}`);
   info(`Latest version found: ${latestVersion}`);
 
-  // if the latest version is not greater than the current version, exit
-  if (!(latestVersion > process.env.GITHUB_ACTION_REF!)) {
+  if (latestVersion > process.env.GITHUB_ACTION_REF!) {
+    warning(
+      `Please update the action to the latest version (${latestVersion}) by changing the version in the workflow file. You can also use GitHub Dependabot (https://docs.github.com/en/code-security/dependabot/working-with-dependabot/keeping-your-actions-up-to-date-with-dependabot) to do it automatically in the future.`,
+    );
+  } else {
     info(`No updates found. Bye bye!`);
-    process.exit(0);
   }
-
-  // clone the repository, and update the action version in the workflow file
-  const repoName = process.env.GITHUB_REPOSITORY!.split('/')[1];
-  execSync(
-    `git clone https://x-access-token:${token}@github.com/${process.env.GITHUB_REPOSITORY}.git`,
-    {
-      stdio: 'inherit',
-    },
-  );
-  execSync(`git -C ${repoName} config --local user.name github-actions`, {
-    stdio: 'inherit',
-  });
-  execSync(
-    `git -C ${repoName} config --local user.email 41898282+github-actions[bot]@users.noreply.github.com`,
-    { stdio: 'inherit' },
-  );
-  execSync(
-    `git -C ${repoName} checkout -b winget-releaser/update-to-${latestVersion}`,
-    {
-      stdio: 'inherit',
-    },
-  );
-  // replace the version in the workflow file using `find` and `sed`
-  execSync(
-    `find -name '*.yml' -or -name '*.yaml' -exec sed -i 's/vedantmgoyal2009\\/winget-releaser@${process.env.GITHUB_ACTION_REF}/vedantmgoyal2009\\/winget-releaser@${latestVersion}/g' {} +`,
-    {
-      stdio: 'inherit',
-      cwd: `${repoName}/.github/workflows`,
-      shell: 'bash',
-    },
-  );
-  // create a new branch, commit and push the changes, and create a pull request
-  execSync(
-    `git -C ${repoName} commit --all -m \"ci(winget-releaser): update action from ${process.env.GITHUB_ACTION_REF} to ${latestVersion}\"`,
-    {
-      stdio: 'inherit',
-    },
-  );
-  execSync(
-    `git -C ${repoName} push origin winget-releaser/update-to-${latestVersion} --force-with-lease`,
-    {
-      stdio: 'inherit',
-    },
-  );
-  info(
-    `Pull request created: ${
-      (
-        await github.rest.pulls.create({
-          ...context.repo,
-          title: `ci(winget-releaser): update action from ${process.env.GITHUB_ACTION_REF} to ${latestVersion}`,
-          head: `winget-releaser/update-to-${latestVersion}`,
-          base: (
-            await github.rest.repos.get({
-              ...context.repo,
-            })
-          ).data.default_branch,
-          body:
-            `This PR was automatically created by the [WinGet Releaser GitHub Action](https://github.com/vedantmgoyal2009/winget-releaser) to update the action version from \`${process.env.GITHUB_ACTION_REF}\` to \`${latestVersion}\`.\n\n` +
-            'The auto-update function help maintainers keep their workflows up-to-date with the latest version of the action.\n\n' +
-            "You can close this pull request if you don't want to update the action version.\n\n" +
-            'Mentioning @vedantmgoyal2009 for a second pair of eyes, in case any breaking changes have been introduced in the new version of the action.',
-        })
-      ).data.html_url
-    }`,
-  );
   endGroup();
 })();
