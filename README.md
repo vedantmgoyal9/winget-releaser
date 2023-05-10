@@ -230,6 +230,17 @@ fork will be used to create the pull request.
 ```yaml
 fork-user: dotnet-winget-bot # for example purposes only
 ```
+## 🚀 Integrating with Komac: Supercharging WinGet Releaser 🌟
+
+WinGet Releaser is a powerful tool that integrates seamlessly with [Komac](https://github.com/russellbanks/Komac), an innovative open-source solution that specialises in creating manifests for the Windows Package Manager Community Repository.
+
+WinGet Releaser is designed to effortlessly fetch URLs from your releases and funnel them directly to Komac. This process not only optimises your workflow but also leverages Komac's capabilities to enhance the functionality of your software distribution.
+
+We gratefully acknowledge Komac and its open-source community. Without their valuable tool, WinGet Releaser would not be possible. By utilising Komac as a crucial part of this action, we're able to offer a more streamlined and robust solution for managing Windows package releases.
+
+We encourage you to explore and contribute to [Komac](https://github.com/russellbanks/Komac) as it continues to evolve and drive forward the open-source ecosystem.
+
+[<img src="https://user-images.githubusercontent.com/74878137/217098245-7aa8957b-b34e-4cba-b822-ca7a2448c3b7.svg" alt="Komac banner" width="600"/>](https://github.com/russellbanks/Komac)
 
 ## Contributors ✨
 
