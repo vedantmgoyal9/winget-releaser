@@ -8,17 +8,9 @@ import {
 } from '@actions/core';
 import { context, getOctokit } from '@actions/github';
 import { execSync } from 'node:child_process';
-import { join } from 'node:path';
 import fetch from 'node-fetch';
-import { existsSync, rmSync } from 'node:fs';
 
 (async () => {
-  // check if the runner operating system is windows
-  if (process.platform !== 'win32') {
-    error('This action only works on Windows.');
-    process.exit(1);
-  }
-
   // get the inputs from the action
   const pkgid = getInput('identifier');
   const version = getInput('version');
@@ -26,10 +18,10 @@ import { existsSync, rmSync } from 'node:fs';
   const releaseRepository = getInput('release-repository');
   const releaseTag = getInput('release-tag');
   const maxVersionsToKeep = Number(getInput('max-versions-to-keep'));
-  const token = getInput('token');
-  const forkUser = getInput('fork-user');
+  process.env.GITHUB_TOKEN = getInput('token');
+  process.env.KMC_FRK_OWNER = getInput('fork-user');
 
-  const github = getOctokit(token);
+  const github = getOctokit(process.env.GITHUB_TOKEN);
 
   // check if at least one version of the package is already present in winget-pkgs repository
   fetch(
@@ -85,10 +77,8 @@ import { existsSync, rmSync } from 'node:fs';
       return asset.browser_download_url;
     });
 
-  // set github token environment variable, and execute komac to update the manifest and submit the pull request
+  // execute komac to update the manifest and submit the pull request
   process.env.KMC_CRTD_WITH = `WinGet Releaser ${process.env.GITHUB_ACTION_REF}`;
-  process.env.KMC_FRK_OWNER = forkUser;
-  process.env.GITHUB_TOKEN = token;
   const command = `-jar komac.jar update --id \'${pkgid}\' --version ${pkgVersion} --urls \'${installerUrls.join(
     ',',
   )}\' --submit`;
@@ -99,7 +89,7 @@ import { existsSync, rmSync } from 'node:fs';
   });
   endGroup();
 
-  // get the list of existing versions of the package using wingetdev
+  // get the list of existing versions of the package from winget-manifests-manager api
   let existingVersions: string[] = (
     await (
       await fetch(
@@ -142,91 +132,20 @@ import { existsSync, rmSync } from 'node:fs';
     );
     endGroup();
 
-    // check if winget-pkgs already exists, and delete it if it does
-    if (existsSync('winget-pkgs')) {
-      rmSync('winget-pkgs', { recursive: true, force: true });
-    }
-
-    // clone the winget-pkgs repository, and configure remotes
-    startGroup('Cloning winget-pkgs repository...');
-    execSync(
-      `git clone https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git`,
-      { stdio: 'inherit' },
-    );
-    execSync(`git -C winget-pkgs config --local user.name github-actions`, {
-      stdio: 'inherit',
-    });
-    execSync(
-      `git -C winget-pkgs config --local user.email 41898282+github-actions[bot]@users.noreply.github.com`,
-      { stdio: 'inherit' },
-    );
-    execSync(`git -C winget-pkgs remote rename origin upstream`, {
-      stdio: 'inherit',
-    });
-    execSync(
-      `git -C winget-pkgs remote add origin https://github.com/${forkUser}/winget-pkgs.git`,
-      { stdio: 'inherit' },
-    );
-    endGroup();
-
-    startGroup('Deleting old versions...');
-    // build the path to the package directory (e.g. manifests/m/Microsoft/OneDrive)
-    const pkgDir = join(
-      'manifests',
-      `${pkgid[0].toLowerCase()}`,
-      `${pkgid.replace('.', '/')}`,
-    );
-
     // iterate over the left over versions and delete them
     existingVersions.forEach(async (version) => {
-      if (existsSync(join('winget-pkgs', pkgDir, version)) === false) {
-        info(`Version ${version} does not exist. Skipping and moving on...`);
-        return;
-      }
-
-      info(`Deleting version ${version}...`);
-      execSync(`git -C winget-pkgs fetch upstream master`, {
+      startGroup(`Deleting version ${version}...`);
+      const command = `-jar komac.jar remove --id \'${pkgid}\' --version ${pkgVersion} --reason \'This version is older than what has been set in \`max-versions-to-keep\` by the publisher.\' --submit`;
+      info(`Executing command: java ${command}`);
+      execSync(`& $env:JAVA_HOME_17_X64\\bin\\java.exe ${command}`, {
+        shell: 'pwsh',
         stdio: 'inherit',
       });
-      execSync(
-        `git -C winget-pkgs checkout -b ${pkgid}-v${version}-REMOVE upstream/master`,
-        {
-          stdio: 'inherit',
-        },
-      );
-      rmSync(join('winget-pkgs', pkgDir, version), {
-        recursive: true,
-        force: true,
-      });
-      execSync(
-        `git -C winget-pkgs commit --all -m \"Remove: ${pkgid} version ${version}\"`,
-        { stdio: 'inherit' },
-      );
-      execSync(`git -C winget-pkgs push origin ${pkgid}-v${version}-REMOVE`, {
-        stdio: 'inherit',
-      });
-      info(
-        `Pull request created: ${
-          (
-            await github.rest.pulls.create({
-              owner: 'microsoft',
-              repo: 'winget-pkgs',
-              title: `Remove: ${pkgid} version ${version}`,
-              head: `${forkUser}:${pkgid}-v${version}-REMOVE`,
-              base: 'master',
-              body:
-                '### Reason for removal: This version is older than what has been set in `max-versions-to-keep` by the publisher.\n\n' +
-                '#### Pull request has been automatically created using 🛫 [WinGet Releaser](https://github.com/vedantmgoyal2009/winget-releaser).',
-            })
-          ).data.html_url
-        }`,
-      );
-      execSync(`git -C winget-pkgs checkout master`, { stdio: 'inherit' });
+      endGroup();
     });
-    endGroup();
   }
 
-  // check for action updates, and create a pull request if there are any
+  // check for action updates, and output a warning if there are any
   startGroup('Checking for action updates...');
   const latestVersion = (
     await github.rest.repos.getLatestRelease({

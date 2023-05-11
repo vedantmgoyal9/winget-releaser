@@ -13,15 +13,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __nccwpck_require__(2186);
 const github_1 = __nccwpck_require__(5438);
 const node_child_process_1 = __nccwpck_require__(7718);
-const node_path_1 = __nccwpck_require__(9411);
 const node_fetch_1 = __importDefault(__nccwpck_require__(467));
-const node_fs_1 = __nccwpck_require__(7561);
 (async () => {
-    // check if the runner operating system is windows
-    if (process.platform !== 'win32') {
-        (0, core_1.error)('This action only works on Windows.');
-        process.exit(1);
-    }
     // get the inputs from the action
     const pkgid = (0, core_1.getInput)('identifier');
     const version = (0, core_1.getInput)('version');
@@ -29,9 +22,9 @@ const node_fs_1 = __nccwpck_require__(7561);
     const releaseRepository = (0, core_1.getInput)('release-repository');
     const releaseTag = (0, core_1.getInput)('release-tag');
     const maxVersionsToKeep = Number((0, core_1.getInput)('max-versions-to-keep'));
-    const token = (0, core_1.getInput)('token');
-    const forkUser = (0, core_1.getInput)('fork-user');
-    const github = (0, github_1.getOctokit)(token);
+    process.env.GITHUB_TOKEN = (0, core_1.getInput)('token');
+    process.env.KMC_FRK_OWNER = (0, core_1.getInput)('fork-user');
+    const github = (0, github_1.getOctokit)(process.env.GITHUB_TOKEN);
     // check if at least one version of the package is already present in winget-pkgs repository
     (0, node_fetch_1.default)(`https://github.com/microsoft/winget-pkgs/tree/master/manifests/${pkgid
         .charAt(0)
@@ -68,10 +61,8 @@ const node_fs_1 = __nccwpck_require__(7561);
         .map((asset) => {
         return asset.browser_download_url;
     });
-    // set github token environment variable, and execute komac to update the manifest and submit the pull request
+    // execute komac to update the manifest and submit the pull request
     process.env.KMC_CRTD_WITH = `WinGet Releaser ${process.env.GITHUB_ACTION_REF}`;
-    process.env.KMC_FRK_OWNER = forkUser;
-    process.env.GITHUB_TOKEN = token;
     const command = `-jar komac.jar update --id \'${pkgid}\' --version ${pkgVersion} --urls \'${installerUrls.join(',')}\' --submit`;
     (0, core_1.info)(`Executing command: java ${command}`);
     (0, node_child_process_1.execSync)(`& $env:JAVA_HOME_17_X64\\bin\\java.exe ${command}`, {
@@ -79,7 +70,7 @@ const node_fs_1 = __nccwpck_require__(7561);
         stdio: 'inherit',
     });
     (0, core_1.endGroup)();
-    // get the list of existing versions of the package using wingetdev
+    // get the list of existing versions of the package from winget-manifests-manager api
     let existingVersions = (await (await (0, node_fetch_1.default)(`https://winget-manifests-manager.vercel.app/api/get-winget-packages`)).json())[pkgid]
         .sort()
         .reverse();
@@ -100,60 +91,19 @@ const node_fs_1 = __nccwpck_require__(7561);
             existingVersions.shift();
         (0, core_1.info)(`Result: ${existingVersions.length} versions will be deleted (${existingVersions.join(', ')}).`);
         (0, core_1.endGroup)();
-        // check if winget-pkgs already exists, and delete it if it does
-        if ((0, node_fs_1.existsSync)('winget-pkgs')) {
-            (0, node_fs_1.rmSync)('winget-pkgs', { recursive: true, force: true });
-        }
-        // clone the winget-pkgs repository, and configure remotes
-        (0, core_1.startGroup)('Cloning winget-pkgs repository...');
-        (0, node_child_process_1.execSync)(`git clone https://x-access-token:${token}@github.com/microsoft/winget-pkgs.git`, { stdio: 'inherit' });
-        (0, node_child_process_1.execSync)(`git -C winget-pkgs config --local user.name github-actions`, {
-            stdio: 'inherit',
-        });
-        (0, node_child_process_1.execSync)(`git -C winget-pkgs config --local user.email 41898282+github-actions[bot]@users.noreply.github.com`, { stdio: 'inherit' });
-        (0, node_child_process_1.execSync)(`git -C winget-pkgs remote rename origin upstream`, {
-            stdio: 'inherit',
-        });
-        (0, node_child_process_1.execSync)(`git -C winget-pkgs remote add origin https://github.com/${forkUser}/winget-pkgs.git`, { stdio: 'inherit' });
-        (0, core_1.endGroup)();
-        (0, core_1.startGroup)('Deleting old versions...');
-        // build the path to the package directory (e.g. manifests/m/Microsoft/OneDrive)
-        const pkgDir = (0, node_path_1.join)('manifests', `${pkgid[0].toLowerCase()}`, `${pkgid.replace('.', '/')}`);
         // iterate over the left over versions and delete them
         existingVersions.forEach(async (version) => {
-            if ((0, node_fs_1.existsSync)((0, node_path_1.join)('winget-pkgs', pkgDir, version)) === false) {
-                (0, core_1.info)(`Version ${version} does not exist. Skipping and moving on...`);
-                return;
-            }
-            (0, core_1.info)(`Deleting version ${version}...`);
-            (0, node_child_process_1.execSync)(`git -C winget-pkgs fetch upstream master`, {
+            (0, core_1.startGroup)(`Deleting version ${version}...`);
+            const command = `-jar komac.jar remove --id \'${pkgid}\' --version ${pkgVersion} --reason \'This version is older than what has been set in \`max-versions-to-keep\` by the publisher.\' --submit`;
+            (0, core_1.info)(`Executing command: java ${command}`);
+            (0, node_child_process_1.execSync)(`& $env:JAVA_HOME_17_X64\\bin\\java.exe ${command}`, {
+                shell: 'pwsh',
                 stdio: 'inherit',
             });
-            (0, node_child_process_1.execSync)(`git -C winget-pkgs checkout -b ${pkgid}-v${version}-REMOVE upstream/master`, {
-                stdio: 'inherit',
-            });
-            (0, node_fs_1.rmSync)((0, node_path_1.join)('winget-pkgs', pkgDir, version), {
-                recursive: true,
-                force: true,
-            });
-            (0, node_child_process_1.execSync)(`git -C winget-pkgs commit --all -m \"Remove: ${pkgid} version ${version}\"`, { stdio: 'inherit' });
-            (0, node_child_process_1.execSync)(`git -C winget-pkgs push origin ${pkgid}-v${version}-REMOVE`, {
-                stdio: 'inherit',
-            });
-            (0, core_1.info)(`Pull request created: ${(await github.rest.pulls.create({
-                owner: 'microsoft',
-                repo: 'winget-pkgs',
-                title: `Remove: ${pkgid} version ${version}`,
-                head: `${forkUser}:${pkgid}-v${version}-REMOVE`,
-                base: 'master',
-                body: '### Reason for removal: This version is older than what has been set in `max-versions-to-keep` by the publisher.\n\n' +
-                    '#### Pull request has been automatically created using 🛫 [WinGet Releaser](https://github.com/vedantmgoyal2009/winget-releaser).',
-            })).data.html_url}`);
-            (0, node_child_process_1.execSync)(`git -C winget-pkgs checkout master`, { stdio: 'inherit' });
+            (0, core_1.endGroup)();
         });
-        (0, core_1.endGroup)();
     }
-    // check for action updates, and create a pull request if there are any
+    // check for action updates, and output a warning if there are any
     (0, core_1.startGroup)('Checking for action updates...');
     const latestVersion = (await github.rest.repos.getLatestRelease({
         owner: 'vedantmgoyal2009',
@@ -2114,6 +2064,10 @@ function checkBypass(reqUrl) {
     if (!reqUrl.hostname) {
         return false;
     }
+    const reqHost = reqUrl.hostname;
+    if (isLoopbackAddress(reqHost)) {
+        return true;
+    }
     const noProxy = process.env['no_proxy'] || process.env['NO_PROXY'] || '';
     if (!noProxy) {
         return false;
@@ -2139,13 +2093,24 @@ function checkBypass(reqUrl) {
         .split(',')
         .map(x => x.trim().toUpperCase())
         .filter(x => x)) {
-        if (upperReqHosts.some(x => x === upperNoProxyItem)) {
+        if (upperNoProxyItem === '*' ||
+            upperReqHosts.some(x => x === upperNoProxyItem ||
+                x.endsWith(`.${upperNoProxyItem}`) ||
+                (upperNoProxyItem.startsWith('.') &&
+                    x.endsWith(`${upperNoProxyItem}`)))) {
             return true;
         }
     }
     return false;
 }
 exports.checkBypass = checkBypass;
+function isLoopbackAddress(host) {
+    const hostLower = host.toLowerCase();
+    return (hostLower === 'localhost' ||
+        hostLower.startsWith('127.') ||
+        hostLower.startsWith('[::1]') ||
+        hostLower.startsWith('[0:0:0:0:0:0:0:1]'));
+}
 //# sourceMappingURL=proxy.js.map
 
 /***/ }),
@@ -9838,22 +9803,6 @@ module.exports = require("net");
 
 "use strict";
 module.exports = require("node:child_process");
-
-/***/ }),
-
-/***/ 7561:
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("node:fs");
-
-/***/ }),
-
-/***/ 9411:
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("node:path");
 
 /***/ }),
 
