@@ -35,7 +35,7 @@ expediting the amount of time it takes for a submission to be reviewed.
 
 4. Add the action to your workflow file (e.g. `.github/workflows/<name>.yml`). Some quick & important points to note:
 
-- The action can only be run on Windows runners, so the job must run on `windows-latest`.
+- ~~The action can only be run on Windows runners, so the job must run on `windows-latest`~~ All operating systems are supported now.
 - The action will only work when the release is **published** (not a draft), because the release assets (binaries) aren't available publicly until the release is published.
 
 ## Examples
@@ -55,7 +55,6 @@ on:
     types: [released]
 jobs:
   publish:
-    # Action can only be run on windows
     runs-on: windows-latest
     steps:
       - uses: vedantmgoyal2009/winget-releaser@v2
@@ -230,17 +229,14 @@ fork will be used to create the pull request.
 ```yaml
 fork-user: dotnet-winget-bot # for example purposes only
 ```
-## 🚀 Integrating with Komac: Supercharging WinGet Releaser 🌟
 
-WinGet Releaser is a powerful tool that integrates seamlessly with [Komac](https://github.com/russellbanks/Komac), an innovative open-source solution that specialises in creating manifests for the Windows Package Manager Community Repository.
+<h2> 🚀 Integrating with <a href="https://github.com/russellbanks/Komac"> <img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/komac-logo.svg" height="24px" style="vertical-align:bottom" alt="Komac logo" /> </a> - Supercharging WinGet Releaser </h1>
 
-WinGet Releaser is designed to effortlessly fetch URLs from your releases and funnel them directly to Komac. This process not only optimises your workflow but also leverages Komac's capabilities to enhance the functionality of your software distribution.
+The action uses [Komac][komac-repo] under the hood to create manifests and publish them to the [Windows Package Manager Community Repository][winget-pkgs-repo] because of its unique capability to update installer URLs with respect to architecture, installer type, scope, etc.
 
-We gratefully acknowledge Komac and its open-source community. Without their valuable tool, WinGet Releaser would not be possible. By utilising Komac as a crucial part of this action, we're able to offer a more streamlined and robust solution for managing Windows package releases.
+I thank [Russell Banks][russellbanks-github-profile], the creator of Komac, for creating such an amazing & wonderful winget manifest creator, because of which, we don't have perform detections for installer type & architecture, product code, etc. since its all done by Komac itself, while matching installer URLs with the manifest of previous version.
 
-We encourage you to explore and contribute to [Komac](https://github.com/russellbanks/Komac) as it continues to evolve and drive forward the open-source ecosystem.
-
-[<img src="https://user-images.githubusercontent.com/74878137/217098245-7aa8957b-b34e-4cba-b822-ca7a2448c3b7.svg" alt="Komac banner" width="600"/>](https://github.com/russellbanks/Komac)
+Again, it is because of Komac that the action can now be used on any platform (Windows, Linux, macOS) and not just Windows (as it was before).
 
 ## Contributors ✨
 
@@ -287,5 +283,7 @@ Contributions of any kind welcome!
 [github-license-badge]: https://img.shields.io/github/license/vedantmgoyal2009/winget-releaser?logo=gnu
 [pr-screenshot-image]: https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-request-by-action-example.png
 [winget-pkgs-repo]: https://github.com/microsoft/winget-pkgs
+[komac-repo]: https://github.com/russellbanks/komac
+[russellbanks-github-profile]: https://github.com/russellbanks
 [pull-app-auto-update-forks]: https://github.com/wei/pull
 [gh-encrypted-secrets]: https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow
