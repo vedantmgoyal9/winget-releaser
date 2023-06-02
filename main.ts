@@ -8,7 +8,7 @@ import {
 } from '@actions/core';
 import { context, getOctokit } from '@actions/github';
 import { execSync } from 'node:child_process';
-import fetch from 'node-fetch';
+import { get, request } from 'node:https';
 
 (async () => {
   // get the inputs from the action
@@ -24,19 +24,23 @@ import fetch from 'node-fetch';
   const github = getOctokit(process.env.GITHUB_TOKEN);
 
   // check if at least one version of the package is already present in winget-pkgs repository
-  fetch(
-    `https://github.com/microsoft/winget-pkgs/tree/master/manifests/${pkgid
-      .charAt(0)
-      .toLowerCase()}/${pkgid.replaceAll('.', '/')}`,
-    { method: 'HEAD' },
-  ).then((res) => {
-    if (!res.ok) {
-      error(
-        `Package ${pkgid} does not exist in the winget-pkgs repository. Please add atleast one version of the package before using this action.`,
-      );
-      process.exit(1);
-    }
-  });
+  request(
+    {
+      hostname: 'github.com',
+      path: `/microsoft/winget-pkgs/tree/master/manifests/${pkgid
+        .charAt(0)
+        .toLowerCase()}/${pkgid.replaceAll('.', '/')}`,
+      method: 'HEAD',
+    },
+    (res) => {
+      if (res.statusCode === 404) {
+        error(
+          `Package ${pkgid} does not exist in the winget-pkgs repository. Please add atleast one version of the package before using this action.`,
+        );
+        process.exit(1);
+      }
+    },
+  );
 
   // check if max-versions-to-keep is a valid number and is 0 (keep all versions) or greater than 0
   if (!Number.isInteger(maxVersionsToKeep) || maxVersionsToKeep < 0) {
@@ -90,15 +94,16 @@ import fetch from 'node-fetch';
   endGroup();
 
   // get the list of existing versions of the package from winget-manifests-manager api
-  let existingVersions: string[] = (
-    await (
-      await fetch(
-        `https://winget-manifests-manager.vercel.app/api/get-winget-packages`,
-      )
-    ).json()
-  )[pkgid]
-    .sort()
-    .reverse();
+  const existingVersions: string[] = await new Promise((resolve, reject) => {
+    get(
+      'https://winget-manifests-manager.vercel.app/api/get-winget-packages',
+      (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => resolve(JSON.parse(data)[pkgid].sort().reverse()));
+      },
+    ).on('error', (err) => reject(err));
+  });
 
   // if maxVersionsToKeep is not 0, and no. of existing versions is greater than maxVersionsToKeep,
   // delete the older versions (starting from the oldest version)
