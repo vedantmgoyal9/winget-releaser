@@ -5,6 +5,7 @@ import {
   startGroup,
   info,
   warning,
+  toPlatformPath,
 } from '@actions/core';
 import { context, getOctokit } from '@actions/github';
 import { execSync } from 'node:child_process';
@@ -83,11 +84,12 @@ import { get, request } from 'node:https';
 
   // execute komac to update the manifest and submit the pull request
   process.env.KMC_CRTD_WITH = `WinGet Releaser ${process.env.GITHUB_ACTION_REF}`;
+  const binPath = toPlatformPath('$env:JAVA_HOME_17_X64\\bin\\java');
   const command = `-jar komac.jar update --id \'${pkgid}\' --version ${pkgVersion} --urls \'${installerUrls.join(
     ',',
   )}\' --submit`;
   info(`Executing command: java ${command}`);
-  execSync(`& $env:JAVA_HOME_17_X64\\bin\\java.exe ${command}`, {
+  execSync(`& ${binPath} ${command}`, {
     shell: 'pwsh',
     stdio: 'inherit',
   });
@@ -142,7 +144,7 @@ import { get, request } from 'node:https';
       startGroup(`Deleting version ${version}...`);
       const command = `-jar komac.jar remove --id \'${pkgid}\' --version ${pkgVersion} --reason \'This version is older than what has been set in \`max-versions-to-keep\` by the publisher.\' --submit`;
       info(`Executing command: java ${command}`);
-      execSync(`& $env:JAVA_HOME_17_X64\\bin\\java.exe ${command}`, {
+      execSync(`& ${binPath} ${command}`, {
         shell: 'pwsh',
         stdio: 'inherit',
       });

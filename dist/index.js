@@ -9866,9 +9866,10 @@ const node_https_1 = __nccwpck_require__(2286);
     });
     // execute komac to update the manifest and submit the pull request
     process.env.KMC_CRTD_WITH = `WinGet Releaser ${process.env.GITHUB_ACTION_REF}`;
+    const binPath = (0, core_1.toPlatformPath)('$env:JAVA_HOME_17_X64\\bin\\java');
     const command = `-jar komac.jar update --id \'${pkgid}\' --version ${pkgVersion} --urls \'${installerUrls.join(',')}\' --submit`;
     (0, core_1.info)(`Executing command: java ${command}`);
-    (0, node_child_process_1.execSync)(`& $env:JAVA_HOME_17_X64\\bin\\java.exe ${command}`, {
+    (0, node_child_process_1.execSync)(`& ${binPath} ${command}`, {
         shell: 'pwsh',
         stdio: 'inherit',
     });
@@ -9903,7 +9904,7 @@ const node_https_1 = __nccwpck_require__(2286);
             (0, core_1.startGroup)(`Deleting version ${version}...`);
             const command = `-jar komac.jar remove --id \'${pkgid}\' --version ${pkgVersion} --reason \'This version is older than what has been set in \`max-versions-to-keep\` by the publisher.\' --submit`;
             (0, core_1.info)(`Executing command: java ${command}`);
-            (0, node_child_process_1.execSync)(`& $env:JAVA_HOME_17_X64\\bin\\java.exe ${command}`, {
+            (0, node_child_process_1.execSync)(`& ${binPath} ${command}`, {
                 shell: 'pwsh',
                 stdio: 'inherit',
             });
