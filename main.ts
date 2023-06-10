@@ -80,6 +80,7 @@ import fetch from 'node-fetch';
 
   // execute komac to update the manifest and submit the pull request
   process.env.KMC_CRTD_WITH = `WinGet Releaser ${process.env.GITHUB_ACTION_REF}`;
+  process.env.KMC_CRTD_WITH_URL = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_ACTION_REPOSITORY}`;
   const javaPath = toPlatformPath(`${process.env.JAVA_HOME_17_X64}/bin/java`);
   const command = `-jar komac.jar update --id \'${pkgid}\' --version ${pkgVersion} --urls \'${installerUrls.join(
     ',',

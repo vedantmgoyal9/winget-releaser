@@ -63,6 +63,7 @@ const node_fetch_1 = __importDefault(__nccwpck_require__(467));
     });
     // execute komac to update the manifest and submit the pull request
     process.env.KMC_CRTD_WITH = `WinGet Releaser ${process.env.GITHUB_ACTION_REF}`;
+    process.env.KMC_CRTD_WITH_URL = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_ACTION_REPOSITORY}`;
     const javaPath = (0, core_1.toPlatformPath)(`${process.env.JAVA_HOME_17_X64}/bin/java`);
     const command = `-jar komac.jar update --id \'${pkgid}\' --version ${pkgVersion} --urls \'${installerUrls.join(',')}\' --submit`;
     (0, core_1.info)(`Executing command: java ${command}`);
