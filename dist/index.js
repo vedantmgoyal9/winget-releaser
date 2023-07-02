@@ -72,8 +72,17 @@ const node_fetch_1 = __importDefault(__nccwpck_require__(467));
         stdio: 'inherit',
     });
     (0, core_1.endGroup)();
-    // get the list of existing versions of the package from winget-manifests-manager api
-    let existingVersions = (await (await (0, node_fetch_1.default)(`https://winget-manifests-manager.vercel.app/api/get-winget-packages`)).json())[pkgid]
+    // clean up previous stale branches on the fork, from previous merged pull requests created by this action
+    (0, core_1.startGroup)('Cleaning up previous stale branches of merged pull requests on the fork...');
+    const cleanupCmd = `-jar komac.jar branch cleanup --only-merged`;
+    (0, core_1.info)(`Executing command: java ${cleanupCmd}`);
+    (0, node_child_process_1.execSync)(`& ${javaPath} ${cleanupCmd}`, {
+        shell: 'pwsh',
+        stdio: 'inherit',
+    });
+    (0, core_1.endGroup)();
+    // get the list of existing versions of the package from an api
+    let existingVersions = (await (await (0, node_fetch_1.default)(`https://winget.vercel.app/api/winget-pkg-versions?pkgid=${pkgid}`)).json())[pkgid]
         .sort()
         .reverse();
     // if maxVersionsToKeep is not 0, and no. of existing versions is greater than maxVersionsToKeep,
@@ -6486,8 +6495,11 @@ function fixResponseChunkedTransferBadEnding(request, errorCallback) {
 
 		if (headers['transfer-encoding'] === 'chunked' && !headers['content-length']) {
 			response.once('close', function (hadError) {
+				// tests for socket presence, as in some situations the
+				// the 'socket' event is not triggered for the request
+				// (happens in deno), avoids `TypeError`
 				// if a data listener is still present we didn't end cleanly
-				const hasDataListener = socket.listenerCount('data') > 0;
+				const hasDataListener = socket && socket.listenerCount('data') > 0;
 
 				if (hasDataListener && !hadError) {
 					const err = new Error('Premature close');

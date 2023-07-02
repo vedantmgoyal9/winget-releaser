@@ -92,11 +92,23 @@ import fetch from 'node-fetch';
   });
   endGroup();
 
-  // get the list of existing versions of the package from winget-manifests-manager api
+  // clean up previous stale branches on the fork, from previous merged pull requests created by this action
+  startGroup(
+    'Cleaning up previous stale branches of merged pull requests on the fork...',
+  );
+  const cleanupCmd = `-jar komac.jar branch cleanup --only-merged`;
+  info(`Executing command: java ${cleanupCmd}`);
+  execSync(`& ${javaPath} ${cleanupCmd}`, {
+    shell: 'pwsh',
+    stdio: 'inherit',
+  });
+  endGroup();
+
+  // get the list of existing versions of the package from an api
   let existingVersions: string[] = (
     await (
       await fetch(
-        `https://winget-manifests-manager.vercel.app/api/get-winget-packages`,
+        `https://winget.vercel.app/api/winget-pkg-versions?pkgid=${pkgid}`,
       )
     ).json()
   )[pkgid]
