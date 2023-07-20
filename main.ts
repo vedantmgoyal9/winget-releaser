@@ -49,7 +49,7 @@ import fetch from 'node-fetch';
 
   // fetch komac.jar from the latest release
   execSync(
-    `Invoke-WebRequest -Uri https://github.com/russellbanks/Komac/releases/download/v1.9.0/Komac-1.9.0-all.jar -OutFile komac.jar`,
+    `Invoke-WebRequest -Uri https://github.com/russellbanks/Komac/releases/download/v1.9.1/Komac-1.9.1-all.jar -OutFile komac.jar`,
     {
       shell: 'pwsh',
       stdio: 'inherit',
