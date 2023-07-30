@@ -24,6 +24,21 @@ import fetch from 'node-fetch';
 
   const github = getOctokit(process.env.GITHUB_TOKEN);
 
+  // install dependencies for running komac
+  if (process.platform !== 'win32') {
+    startGroup('Installing dependencies for running komac...');
+    execSync(
+      `${
+        process.platform === 'linux' ? 'sudo apt-get -y' : 'brew'
+      } install msitools`,
+      {
+        shell: 'pwsh',
+        stdio: 'inherit',
+      },
+    );
+    endGroup();
+  }
+
   // check if at least one version of the package is already present in winget-pkgs repository
   fetch(
     `https://github.com/microsoft/winget-pkgs/tree/master/manifests/${pkgid

@@ -25,6 +25,15 @@ const node_fetch_1 = __importDefault(__nccwpck_require__(467));
     process.env.GITHUB_TOKEN = (0, core_1.getInput)('token');
     process.env.KMC_FRK_OWNER = (0, core_1.getInput)('fork-user');
     const github = (0, github_1.getOctokit)(process.env.GITHUB_TOKEN);
+    // install dependencies for running komac
+    if (process.platform !== 'win32') {
+        (0, core_1.startGroup)('Installing dependencies for running komac...');
+        (0, node_child_process_1.execSync)(`${process.platform === 'linux' ? 'sudo apt-get -y' : 'brew'} install msitools`, {
+            shell: 'pwsh',
+            stdio: 'inherit',
+        });
+        (0, core_1.endGroup)();
+    }
     // check if at least one version of the package is already present in winget-pkgs repository
     (0, node_fetch_1.default)(`https://github.com/microsoft/winget-pkgs/tree/master/manifests/${pkgid
         .charAt(0)
