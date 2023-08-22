@@ -31,7 +31,7 @@ inputs:
     description: GitHub username where the fork of winget-pkgs is present.
     default: ${{ github.repository_owner }}
 runs:
-  using: node16
+  using: node20
   main: dist/index.js
 branding:
   color: blue
