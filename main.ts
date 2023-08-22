@@ -9,7 +9,6 @@ import {
 } from '@actions/core';
 import { context, getOctokit } from '@actions/github';
 import { execSync } from 'node:child_process';
-import fetch from 'node-fetch';
 
 (async () => {
   // get the inputs from the action
