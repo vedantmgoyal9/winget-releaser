@@ -136,6 +136,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "doug24",
+      "name": "Doug P",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17227248?v=4",
+      "profile": "https://github.com/doug24",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "commitType": "docs"
