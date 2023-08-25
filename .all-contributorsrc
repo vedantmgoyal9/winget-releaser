@@ -127,6 +127,16 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "ilike2burnthing",
+      "name": "ilike2burnthing",
+      "avatar_url": "https://avatars.githubusercontent.com/u/59480337?v=4",
+      "profile": "https://github.com/ilike2burnthing",
+      "contributions": [
+        "bug"
+      ]
     }
-  ]
+  ],
+  "commitType": "docs"
 }
