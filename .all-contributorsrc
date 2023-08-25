@@ -163,6 +163,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "justinmk",
+      "name": "Justin M. Keyes",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1359421?v=4",
+      "profile": "https://sink.io",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "commitType": "docs"
