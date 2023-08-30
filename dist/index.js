@@ -9857,7 +9857,7 @@ const node_child_process_1 = __nccwpck_require__(7718);
         process.exit(1);
     }
     // fetch komac.jar from the latest release
-    (0, node_child_process_1.execSync)(`Invoke-WebRequest -Uri https://github.com/russellbanks/Komac/releases/download/v1.10.1/Komac-1.10.1-all.jar -OutFile komac.jar`, {
+    (0, node_child_process_1.execSync)(`Invoke-WebRequest -Uri https://github.com/russellbanks/Komac/releases/download/v1.11.0/Komac-1.11.0-all.jar -OutFile komac.jar`, {
         shell: 'pwsh',
         stdio: 'inherit',
     });

@@ -63,7 +63,7 @@ import { execSync } from 'node:child_process';
 
   // fetch komac.jar from the latest release
   execSync(
-    `Invoke-WebRequest -Uri https://github.com/russellbanks/Komac/releases/download/v1.10.1/Komac-1.10.1-all.jar -OutFile komac.jar`,
+    `Invoke-WebRequest -Uri https://github.com/russellbanks/Komac/releases/download/v1.11.0/Komac-1.11.0-all.jar -OutFile komac.jar`,
     {
       shell: 'pwsh',
       stdio: 'inherit',
