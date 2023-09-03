@@ -5,7 +5,7 @@
 ![GitHub release (latest by date)][github-release-badge]
 ![GitHub Repo stars][github-repo-stars-badge]
 ![GitHub][github-license-badge]
-[![Playground-dry-run][playground-dry-run-badge]][playground-dry-run]
+<!-- [![Playground-dry-run][playground-dry-run-badge]][playground-dry-run] -->
 
 Publish new releases of your application to the Windows Package Manager easily.
 
@@ -281,7 +281,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification.
 Contributions of any kind welcome!
 
-[playground-dry-run-badge]: https://img.shields.io/badge/Playground_(dry--run)-bittu.eu.org%2Fdocs%2Fwr--playground-abcdef?logo=windowsterminal
+[playground-dry-run-badge]: https://img.shields.io/badge/Playground_(dry--run)-bittu.eu.org%2Fwr--playground-abcdef?logo=windowsterminal
 [playground-dry-run]: https://bittu.eu.org/docs/wr-playground
 [github-all-contributors-badge]: https://img.shields.io/github/all-contributors/vedantmgoyal2009/winget-releaser/main?logo=opensourceinitiative&logoColor=white
 [github-issues-badge]: https://img.shields.io/github/issues/vedantmgoyal2009/winget-releaser?logo=target
