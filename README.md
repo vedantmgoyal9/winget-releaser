@@ -5,7 +5,7 @@
 ![GitHub release (latest by date)][github-release-badge]
 ![GitHub Repo stars][github-repo-stars-badge]
 ![GitHub][github-license-badge]
-<--- [![Playground-dry-run][playground-dry-run-badge]][playground-dry-run] -->
+<!-- [![Playground-dry-run][playground-dry-run-badge]][playground-dry-run] -->
 
 Publish new releases of your application to the Windows Package Manager easily.
 
