@@ -5,7 +5,6 @@
 ![GitHub release (latest by date)][github-release-badge]
 ![GitHub Repo stars][github-repo-stars-badge]
 ![GitHub][github-license-badge]
-<!-- [![Playground-dry-run][playground-dry-run-badge]][playground-dry-run] -->
 
 Publish new releases of your application to the Windows Package Manager easily.
 
@@ -18,12 +17,10 @@ expediting the amount of time it takes for a submission to be reviewed.
 
 ## Getting Started 🚀
 
-1. Atleast **one** version of your package should already be present in the
+1. At least **one** version of your package should already be present in the
    [Windows Package Manager Community Repository][winget-pkgs-repo]. The action will use that version as a base to create manifests for new versions of the package.
 
-2. You will need to create a _classic_ Personal Access Token (PAT) with `public_repo` scope. _New_ fine-grained PATs can't access GitHub's GraphQL API, so they aren't supported by this action. Refer to https://github.com/cli/cli/issues/6680 for more information.
-
-<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pat-scope.png" alt="Personal Access Token Required Scopes" />
+2. You will need to create a _classic_ Personal Access Token (PAT) with `public_repo` scope. _New_ fine-grained PATs aren't supported by the action. Review https://github.com/vedantmgoyal2009/winget-releaser/issues/172 for information.
 
 3. Fork the [winget-pkgs][winget-pkgs-repo] repository under the same account/organization as your repository on which
    you want to use this action. Ensure that the fork is up-to-date with the upstream repository. You can do this using
@@ -33,17 +30,22 @@ expediting the amount of time it takes for a submission to be reviewed.
   fork with the upstream repository.
 - You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date with the upstream repository via automated pull requests.
 
-4. Add the action to your workflow file (e.g. `.github/workflows/<name>.yml`). Some quick & important points to note:
+4. Add the action to your workflow file (e.g. `.github/workflows/<name>.yml`).
 
-- ~~The action can only be run on Windows runners, so the job must run on `windows-latest`~~ All operating systems are supported now.
-- The action will only work when the release is **published** (not a draft), because the release assets (binaries) aren't available publicly until the release is published.
+> [!IMPORTANT]
+> The action will only work when the release is **published** (not a draft), because the release assets (binaries) aren't available publicly until the release is published.
 
-## Examples
+> [!NOTE]
+> In case you're pinning the action to a commit hash, you'll need to update the hash frequently to get the latest features & bug fixes. Therefore, it is **highly** recommended to setup dependabot auto-updates for your repository. Check out [keeping your actions up to date with Dependabot][dependabot-setup-guide] for guidance on how to do this. (Yes, it also supports updating actions pinned to a commit hash!)
+
+## Examples 📝
 
 <table>
 <tr>
 <th align="center"> Workflow with the minimal configuration </th>
 <th align="center"> Workflow with a filter to only publish .exe files </th>
+<th align="center"> Workflow to publish multiple packages </th>
+<th align="center"> Workflow with implementation of custom package version </th>
 </tr>
 <tr>
 <td>
@@ -84,12 +86,6 @@ jobs:
 ```
 
 </td>
-</tr>
-<tr>
-<th align="center"> Workflow to publish multiple packages </th>
-<th align="center"> Workflow with implementation of custom package version </th>
-</tr>
-<tr>
 <td>
 
 ```yaml
@@ -132,7 +128,7 @@ jobs:
         run: |
           # Finding the version from release name
           $VERSION="${{ github.event.release.name }}" -replace '^.*/ '
-          echo "::set-output name=version::$VERSION"
+          "version=$VERSION" >> $env:GITHUB_OUTPUT
         shell: pwsh
       - uses: vedantmgoyal2009/winget-releaser@v2
         with:
@@ -147,96 +143,50 @@ jobs:
 
 ## Configuration Options ⚒️
 
-### Package Identifier (identifier)
+- `identifier`: The package identifier of the package to be updated in the [WinGet Community Repository][winget-pkgs-repo].
 
-- Required: ✅
+  - **Required**: ✅
+  - **Example**: `identifier: Publisher.Package # Microsoft.Excel`
 
-The package identifier of the package to be updated in
-the [Windows Package Manager Community Repository][winget-pkgs-repo].
+- `version`: The `PackageVersion` of the package you want to release.
 
-```yaml
-identifier: Publisher.Package # Microsoft.Excel
-```
+  - **Required**: ❌ (defaults to tag, excluding `v` prefix: `v1.0.0` -> `1.0.0`)
+  - **Example**: `version: ${{ github.event.release.tag_name }} # For tags without the 'v' prefix`
 
-### Version (version)
+- `installers-regex`: A regular expression to match the installers from the release artifacts which are to be published to Windows Package
+  Manager (WinGet).
 
-- Required: ❌ (defaults to tag, excluding `v` prefix: `v1.0.0` -> `1.0.0`)
+  - **Required**: ❌ (Default value: `.(exe|msi|msix|appx)(bundle){0,1}$`)
+  - **Example**: `installers-regex: '\.exe$' # All EXE's`
 
-The `PackageVersion` of the package you want to release.
+- `max-versions-to-keep`: The maximum number of versions of the package to keep in the [WinGet Community Repository][winget-pkgs-repo] repository. If after the current release, the number of versions exceeds this limit, the oldest version will be deleted.
 
-```yaml
-version: ${{ github.event.release.tag_name }} # For tags without the 'v' prefix
-```
+  - **Required**: ❌ (Default value: `0` - unlimited)
+  - **Example**: `max-versions-to-keep: 5 # keep only the latest 5 versions`
 
-### Installers Regex (installers-regex)
+- `release-tag`: The GitHub release tag of the release you want to publish to Windows Package Manager (WinGet).
 
-- Required: ❌ (Default value: `.(exe|msi|msix|appx)(bundle){0,1}$`)
+  - **Required**: ❌ (Default value: `${{ github.event.release.tag_name || github.ref_name }}`)
+  - **Example**: `release-tag: ${{ inputs.version }} # workflow_dispatch input 'version'`
 
-A regular expression to match the installers from the release artifacts which are to be published to Windows Package
-Manager (WinGet).
+- `token`: The GitHub token with which the action will authenticate with GitHub API and create a pull request on the [WinGet Community Repository][winget-pkgs-repo] repository. **The token should have a `public_repo` scope.**
 
-```yaml
-installers-regex: '\.exe$'
-# Some common regular expressions include:
-## '\.msi$'      -> All MSI's
-## '\.exe$'      -> All EXE's
-## '\.(exe|msi)' -> All EXE's and MSI's
-## '\.zip$'      -> All ZIP's
-```
+  - **Required**: ✅
+  - **Example**: `token: ${{ secrets.WINGET_TOKEN }} # Repository secret called 'WINGET_TOKEN'`
 
-### Maximum no. of versions to keep in the winget-pkgs repository (max-versions-to-keep)
+> [!WARNING]
+> Do **not** directly put the token in the action. Instead, create a repository secret containing the token and use that in the workflow. Refer to [using encrypted secrets in a workflow][gh-encrypted-secrets] for more information.
 
-- Required: ❌ (Default value: `0` - unlimited)
-
-The maximum number of versions of the package to keep in the [Windows Package Manager Community Repository][winget-pkgs-repo] repository. If after the current release, the number of versions exceeds this limit, the oldest version will be deleted.
-
-```yaml
-max-versions-to-keep: 5 # keep only the latest 5 versions
-```
-
-### Release tag (release-tag)
-
-- Required: ❌ (Default value: `${{ github.event.release.tag_name || github.ref_name }}`)
-
-The GitHub release tag of the release you want to publish to Windows Package Manager (WinGet).
-
-```yaml
-release-tag: ${{ inputs.version }} # workflow_dispatch input `version`
-```
-
-### Token (token)
-
-- Required: ✅
-
-The GitHub token with which the action will authenticate with GitHub API and create a pull request on
-the [Windows Package Manager Community Repository][winget-pkgs-repo] repository.
-
-```yaml
-token: ${{ secrets.WINGET_TOKEN }} # Repository secret called 'WINGET_TOKEN'
-```
-
-#### The token should have the `public_repo` scope.
-
-> **Note** Do **not** directly put the token in the action. Instead, create a repository secret containing the token and use that in the workflow. See [using encrypted secrets in a workflow][gh-encrypted-secrets] for more details.
-
-### Use fork under which user (fork-user)
-
-- Required: ❌ (Default value: `${{ github.repository_owner }} # repository owner`)
-
-This is the GitHub username of the user where the fork of [Windows Package Manager Community Repository][winget-pkgs-repo] is present. This
-fork will be used to create the pull request.
-
-```yaml
-fork-user: dotnet-winget-bot # for example purposes only
-```
+- `fork-user`: The GitHub username of the user where a fork of [winget-pkgs][winget-pkgs-repo] is present. This
+  fork will be used to create the pull request.
+  - **Required**: ❌ (Default value: `${{ github.repository_owner }} # repository owner`)
+  - **Example**: `fork-user: dotnet-winget-bot # for example purposes only`
 
 <h2> 🚀 Integrating with <a href="https://github.com/russellbanks/Komac"> <img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/komac-logo.svg" height="24px" style="vertical-align:bottom" alt="Komac logo" /> </a> - Supercharging WinGet Releaser </h1>
 
 The action uses [Komac][komac-repo] under the hood to create manifests and publish them to the [Windows Package Manager Community Repository][winget-pkgs-repo] because of its unique capability to update installer URLs with respect to architecture, installer type, scope, etc.
 
-I thank [Russell Banks][russellbanks-github-profile], the creator of Komac, for creating such an amazing & wonderful winget manifest creator, because of which, we don't have perform detections for installer type & architecture, product code, etc. since its all done by Komac itself, while matching installer URLs with the manifest of previous version.
-
-Again, it is because of Komac that the action can now be used on any platform (Windows, Linux, macOS) and not just Windows (as it was before).
+I thank [Russell Banks][russellbanks-github-profile], the creator of Komac, for creating such an amazing & wonderful winget manifest creator, which is the core of this action. Again, it is because of Komac that the action can now be used on any platform (Windows, Linux, macOS) and not just Windows (as it was before).
 
 ## Contributors ✨
 
@@ -282,8 +232,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification.
 Contributions of any kind welcome!
 
-[playground-dry-run-badge]: https://img.shields.io/badge/Playground_(dry--run)-bittu.eu.org%2Fwr--playground-abcdef?logo=windowsterminal
-[playground-dry-run]: https://bittu.eu.org/docs/wr-playground
+[dependabot-setup-guide]: https://docs.github.com/en/code-security/dependabot/working-with-dependabot/keeping-your-actions-up-to-date-with-dependabot#example-dependabotyml-file-for-github-actions
 [github-all-contributors-badge]: https://img.shields.io/github/all-contributors/vedantmgoyal2009/winget-releaser/main?logo=opensourceinitiative&logoColor=white
 [github-issues-badge]: https://img.shields.io/github/issues/vedantmgoyal2009/winget-releaser?logo=target
 [github-release-badge]: https://img.shields.io/github/v/release/vedantmgoyal2009/winget-releaser?logo=github
