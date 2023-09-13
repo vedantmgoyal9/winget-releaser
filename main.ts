@@ -164,7 +164,7 @@ import { execSync } from 'node:child_process';
     // iterate over the left over versions and delete them
     existingVersions.forEach(async (version) => {
       startGroup(`Deleting version ${version}...`);
-      const command = `-jar komac.jar remove --id \'${pkgid}\' --version ${pkgVersion} --reason \'This version is older than what has been set in \`max-versions-to-keep\` by the publisher.\' --submit`;
+      const command = `-jar komac.jar remove --id \'${pkgid}\' --version ${version} --reason \'This version is older than what has been set in \`max-versions-to-keep\` by the publisher.\' --submit`;
       info(`Executing command: java ${command}`);
       execSync(`& ${javaPath} ${command}`, {
         shell: 'pwsh',
