@@ -208,6 +208,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "igoogolx",
+      "name": "igoogolx",
+      "avatar_url": "https://avatars.githubusercontent.com/u/27353191?v=4",
+      "profile": "https://github.com/igoogolx",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ],
   "commitType": "docs"
