@@ -181,6 +181,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "dorssel",
+      "name": "Frans van Dorsselaer",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17404029?v=4",
+      "profile": "https://github.com/dorssel",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "commitType": "docs"
