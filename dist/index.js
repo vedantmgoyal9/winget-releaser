@@ -6423,6 +6423,7 @@ exports.Headers = Headers;
 exports.Request = Request;
 exports.Response = Response;
 exports.FetchError = FetchError;
+exports.AbortError = AbortError;
 
 
 /***/ }),
@@ -9922,7 +9923,7 @@ const node_child_process_1 = __nccwpck_require__(7718);
         // iterate over the left over versions and delete them
         existingVersions.forEach(async (version) => {
             (0, core_1.startGroup)(`Deleting version ${version}...`);
-            const command = `-jar komac.jar remove --id \'${pkgid}\' --version ${pkgVersion} --reason \'This version is older than what has been set in \`max-versions-to-keep\` by the publisher.\' --submit`;
+            const command = `-jar komac.jar remove --id \'${pkgid}\' --version ${version} --reason \'This version is older than what has been set in \`max-versions-to-keep\` by the publisher.\' --submit`;
             (0, core_1.info)(`Executing command: java ${command}`);
             (0, node_child_process_1.execSync)(`& ${javaPath} ${command}`, {
                 shell: 'pwsh',
