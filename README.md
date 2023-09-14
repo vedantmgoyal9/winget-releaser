@@ -188,6 +188,10 @@ The action uses [Komac][komac-repo] under the hood to create manifests and publi
 
 I thank [Russell Banks][russellbanks-github-profile], the creator of Komac, for creating such an amazing & wonderful winget manifest creator, which is the core of this action. Again, it is because of Komac that the action can now be used on any platform (Windows, Linux, macOS) and not just Windows (as it was before).
 
+## 🌟 Stargazers over time 👀
+
+[![Stargazers over time](https://starchart.cc/vedantmgoyal2009/winget-releaser.svg)](https://starchart.cc/vedantmgoyal2009/winget-releaser)
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
