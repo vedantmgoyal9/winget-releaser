@@ -118,14 +118,23 @@ import { execSync } from 'node:child_process';
   });
   endGroup();
 
-  // get the list of existing versions of the package from an api
-  let existingVersions: string[] = (
-    await (
-      await fetch(
-        `https://winget.vercel.app/api/winget-pkg-versions?pkgid=${pkgid}`,
-      )
-    ).json()
-  )[pkgid]
+  // get list of existing versions of the package from github repo contents API
+  const repoContents = (
+    await github.rest.repos.getContent({
+      owner: 'microsoft',
+      repo: 'winget-pkgs',
+      path: `manifests/${pkgid.charAt(0).toLowerCase()}/${pkgid.replaceAll(
+        '.',
+        '/',
+      )}`,
+    })
+  ).data;
+
+  // use `any` type explicitly to suppress typescript error
+  // property `a` does not exist on type `b`
+  let existingVersions: string[] = (repoContents as any)
+    .filter((content: any) => content.type === 'dir')
+    .map((content: any) => content.name)
     .sort()
     .reverse();
 
