@@ -1,7 +1,6 @@
 name: WinGet Releaser
 description: Publish new releases of your application to Windows Package Manager easily.
 author: vedantmgoyal2009 (Vedant)
-
 inputs:
   identifier:
     required: true
@@ -32,7 +31,6 @@ inputs:
     required: true
     description: GitHub username where the fork of winget-pkgs is present.
     default: ${{ github.repository_owner }}
-
 runs:
   using: composite
   steps:
@@ -111,7 +109,6 @@ runs:
           Write-Output "No versions to delete. All good :)"
         }
       shell: pwsh
-
 branding:
   color: blue
   icon: upload-cloud
