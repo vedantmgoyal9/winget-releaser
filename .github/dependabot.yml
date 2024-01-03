@@ -5,24 +5,6 @@
 
 version: 2
 updates:
-  # Maintain dependencies for npm
-  - package-ecosystem: npm # See documentation for possible values
-    directory: / # Location of package manifests
-    allow:
-      - dependency-type: all
-    schedule:
-      interval: daily
-    groups:
-      npm:
-        patterns:
-          - '*'
-    reviewers:
-      - vedantmgoyal2009
-    commit-message:
-      prefix: chore(deps)
-    rebase-strategy: auto
-    target-branch: main
-
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: github-actions
     # Workflow files stored in the
@@ -30,10 +12,6 @@ updates:
     directory: /
     schedule:
       interval: daily
-    groups:
-      gh-actions:
-        patterns:
-          - '*'
     reviewers:
       - vedantmgoyal2009
     commit-message:

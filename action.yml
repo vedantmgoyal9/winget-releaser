@@ -1,9 +1,14 @@
 name: WinGet Releaser
 description: Publish new releases of your application to Windows Package Manager easily.
+author: vedantmgoyal2009 (Vedant)
+branding:
+  color: blue
+  icon: upload-cloud
+
 inputs:
   identifier:
     required: true
-    description: The PackageIdentifier of the package you want to release.
+    description: The PackageIdentifier of the package (case-sensitive).
   version:
     required: false
     description: The PackageVersion of the package you want to release.
@@ -30,9 +35,82 @@ inputs:
     required: true
     description: GitHub username where the fork of winget-pkgs is present.
     default: ${{ github.repository_owner }}
+
 runs:
-  using: node20
-  main: dist/index.js
-branding:
-  color: blue
-  icon: upload-cloud
+  using: composite
+  steps:
+    - uses: actions/setup-go@v5.0.0
+      with:
+        check-latest: true
+        go-version: 1.x
+
+    - name: Install dependencies
+      if: runner.os != 'Windows'
+      run: |
+        if [ "$(uname)" == "Darwin" ]; then
+          brew install msitools
+        else
+          sudo apt-get install -y msitools libmsi-dev
+        fi
+      shell: bash
+
+    - name: Validate inputs
+      run: |
+        # check if at least one version of the package is already present in winget-pkgs repository
+        $PkgId = '{{ inputs.identifier }}'
+        Invoke-WebRequest -Uri "https://github.com/microsoft/winget-pkgs/tree/master/manifests/$($PkgId.ToLower()[0])\$($PkgId.Replace('.', '/'))" -Method Head
+        if (-not $?) {
+          Write-Output "::error::Package $PkgId does not exist in the winget-pkgs repository. Please add atleast one version of the package before using this action."
+          exit 1
+        }
+
+        # check if max-versions-to-keep is a valid number and is 0 (keep all versions) or greater than 0
+        $MaxVersionsToKeep = '{{ inputs.max-versions-to-keep }}'
+        if (-not [int]::TryParse($MaxVersionsToKeep, [ref]$null) -or $MaxVersionsToKeep -lt 0) {
+          Write-Output "::error::Invalid input: max-versions-to-keep should be 0 (zero - keep all versions) or a POSITIVE INTEGER."
+          exit 1
+        }
+      shell: pwsh
+
+    - name: Install winget-pkgs-automation CLI
+      run: go install https://github.com/vedantmgoyal2009/winget-pkgs-automation@latest
+      shell: pwsh
+
+    - name: Get release information
+      id: version-and-urls
+      run: |
+        # get release information using the release tag
+        $ReleaseInfo = Invoke-RestMethod -Uri 'https://api.github.com/{{ github.repository_owner }}/{{ inputs.release-repository }}/tags/{{ inputs.release-tag }}'
+        If ('' -eq '{{ inputs.version }}') {
+          Write-Output "version=$($ReleaseInfo.tag_name -replace '^v')" >> $env:GITHUB_OUTPUT
+        } Else {
+          Write-Output "version={{ inputs.version }}" >> $env:GITHUB_OUTPUT
+        }
+        Write-Output "urls=$(($ReleaseInfo.assets | Where-Object { $_.name -match '{{ inputs.installers-regex }}' } | ForEach-Object { $_.browser_download_url }) -join ',')" >> $env:GITHUB_OUTPUT
+      shell: pwsh
+
+    - name: Update & submit manifests
+      run: winget-pkgs-automation update '{{ inputs.identifier }}' '{{ steps.version-and-urls.outputs.version }}' --urls '{{ steps.version-and-urls.outputs.urls }}' -s --fork-user '{{ inputs.fork-user }}'
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      shell: pwsh
+
+    - name: Check for versions w.r.t. max-versions-to-keep
+      if: ${{ inputs.max-versions-to-keep }} > 0
+      run: |
+        $ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
+        $Versions = winget-pkgs-automation list-versions '{{ inputs.identifier }}' --json | ConvertFrom-Json | Sort-Object $ToNatural
+        $Reason = 'This version is older than what has been set in `max-versions-to-keep` by the publisher.'
+
+        If ($Versions.Count + 1 -gt {{ inputs.max-versions-to-keep }}) {
+          $VersionsToDelete = $Versions[{{ inputs.max-versions-to-keep }}..($Versions.Count - 1)]
+          Write-Output "Versions to delete: $($VersionsToDelete -join ', ')"
+
+          ForEach ($Version in $VersionsToDelete) {
+            Write-Output "Deleting version: $Version"
+            winget-pkgs-automation remove-version '{{ inputs.identifier }}' $Version --reason $Reason --fork-user '{{ inputs.fork-user }}'
+          }
+        } Else {
+          Write-Output "No versions to delete. All good :)"
+        }
+      shell: pwsh
