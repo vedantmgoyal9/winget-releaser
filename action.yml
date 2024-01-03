@@ -111,4 +111,4 @@ runs:
       shell: pwsh
 branding:
   color: blue
-  icon: upload-cloud
+  icon: package
