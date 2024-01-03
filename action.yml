@@ -1,9 +1,6 @@
 name: WinGet Releaser
 description: Publish new releases of your application to Windows Package Manager easily.
 author: vedantmgoyal2009 (Vedant)
-branding:
-  color: blue
-  icon: upload-cloud
 
 inputs:
   identifier:
@@ -114,3 +111,7 @@ runs:
           Write-Output "No versions to delete. All good :)"
         }
       shell: pwsh
+
+branding:
+  color: blue
+  icon: upload-cloud
