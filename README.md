@@ -182,12 +182,6 @@ jobs:
   - **Required**: ❌ (Default value: `${{ github.repository_owner }} # repository owner`)
   - **Example**: `fork-user: dotnet-winget-bot # for example purposes only`
 
-<h2> 🚀 Integrating with <a href="https://github.com/russellbanks/Komac"> <img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/komac-logo.svg" height="24px" style="vertical-align:bottom" alt="Komac logo" /> </a> - Supercharging WinGet Releaser </h1>
-
-The action uses [Komac][komac-repo] under the hood to create manifests and publish them to the [Windows Package Manager Community Repository][winget-pkgs-repo] because of its unique capability to update installer URLs with respect to architecture, installer type, scope, etc.
-
-I thank [Russell Banks][russellbanks-github-profile], the creator of Komac, for creating such an amazing & wonderful winget manifest creator, which is the core of this action. Again, it is because of Komac that the action can now be used on any platform (Windows, Linux, macOS) and not just Windows (as it was before).
-
 ## 🌟 Stargazers over time 👀
 
 [![Stargazers over time](https://starchart.cc/vedantmgoyal2009/winget-releaser.svg)](https://starchart.cc/vedantmgoyal2009/winget-releaser)
