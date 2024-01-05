@@ -94,11 +94,11 @@ runs:
       if: ${{ inputs.max-versions-to-keep }} > 0
       run: |
         $ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
-        $Versions = winget-pkgs-automation list-versions '{{ inputs.identifier }}' --json | ConvertFrom-Json | Sort-Object $ToNatural
+        $Versions = winget-pkgs-automation list-versions '{{ inputs.identifier }}' --json | ConvertFrom-Json | Sort-Object $ToNatural -Descending
         $Reason = 'This version is older than what has been set in `max-versions-to-keep` by the publisher.'
 
         If ($Versions.Count + 1 -gt {{ inputs.max-versions-to-keep }}) {
-          $VersionsToDelete = $Versions[{{ inputs.max-versions-to-keep }}..($Versions.Count - 1)]
+          $VersionsToDelete = $Versions[({{ inputs.max-versions-to-keep }} - 1)..($Versions.Count - 1)]
           Write-Output "Versions to delete: $($VersionsToDelete -join ', ')"
 
           ForEach ($Version in $VersionsToDelete) {
