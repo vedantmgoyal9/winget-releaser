@@ -23,12 +23,7 @@ expediting the amount of time it takes for a submission to be reviewed.
 2. You will need to create a _classic_ Personal Access Token (PAT) with `public_repo` scope. _New_ fine-grained PATs aren't supported by the action. Review https://github.com/vedantmgoyal2009/winget-releaser/issues/172 for information.
 
 3. Fork the [winget-pkgs][winget-pkgs-repo] repository under the same account/organization as your repository on which
-   you want to use this action. Ensure that the fork is up-to-date with the upstream repository. You can do this using
-   one of the following methods:
-
-- Give `workflow` permission to the token you created in Step 1. This will allow the action to automatically update your
-  fork with the upstream repository.
-- You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date with the upstream repository via automated pull requests.
+   you want to use this action. Ensure that the fork is up-to-date with the upstream repository. You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date with the upstream repository via automated pull requests.
 
 4. Add the action to your workflow file (e.g. `.github/workflows/<name>.yml`).
 
@@ -182,12 +177,6 @@ jobs:
   - **Required**: ❌ (Default value: `${{ github.repository_owner }} # repository owner`)
   - **Example**: `fork-user: dotnet-winget-bot # for example purposes only`
 
-<h2> 🚀 Integrating with <a href="https://github.com/russellbanks/Komac"> <img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/komac-logo.svg" height="24px" style="vertical-align:bottom" alt="Komac logo" /> </a> - Supercharging WinGet Releaser </h1>
-
-The action uses [Komac][komac-repo] under the hood to create manifests and publish them to the [Windows Package Manager Community Repository][winget-pkgs-repo] because of its unique capability to update installer URLs with respect to architecture, installer type, scope, etc.
-
-I thank [Russell Banks][russellbanks-github-profile], the creator of Komac, for creating such an amazing & wonderful winget manifest creator, which is the core of this action. Again, it is because of Komac that the action can now be used on any platform (Windows, Linux, macOS) and not just Windows (as it was before).
-
 ## 🌟 Stargazers over time 👀
 
 [![Stargazers over time](https://starchart.cc/vedantmgoyal2009/winget-releaser.svg)](https://starchart.cc/vedantmgoyal2009/winget-releaser)
@@ -250,7 +239,5 @@ Contributions of any kind welcome!
 [github-license-badge]: https://img.shields.io/github/license/vedantmgoyal2009/winget-releaser?logo=gnu
 [pr-screenshot-image]: https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-request-by-action-example.png
 [winget-pkgs-repo]: https://github.com/microsoft/winget-pkgs
-[komac-repo]: https://github.com/russellbanks/komac
-[russellbanks-github-profile]: https://github.com/russellbanks
 [pull-app-auto-update-forks]: https://github.com/wei/pull
 [gh-encrypted-secrets]: https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow
