@@ -23,12 +23,7 @@ expediting the amount of time it takes for a submission to be reviewed.
 2. You will need to create a _classic_ Personal Access Token (PAT) with `public_repo` scope. _New_ fine-grained PATs aren't supported by the action. Review https://github.com/vedantmgoyal2009/winget-releaser/issues/172 for information.
 
 3. Fork the [winget-pkgs][winget-pkgs-repo] repository under the same account/organization as your repository on which
-   you want to use this action. Ensure that the fork is up-to-date with the upstream repository. You can do this using
-   one of the following methods:
-
-- Give `workflow` permission to the token you created in Step 1. This will allow the action to automatically update your
-  fork with the upstream repository.
-- You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date with the upstream repository via automated pull requests.
+   you want to use this action. Ensure that the fork is up-to-date with the upstream repository. You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date with the upstream repository via automated pull requests.
 
 4. Add the action to your workflow file (e.g. `.github/workflows/<name>.yml`).
 
@@ -244,7 +239,5 @@ Contributions of any kind welcome!
 [github-license-badge]: https://img.shields.io/github/license/vedantmgoyal2009/winget-releaser?logo=gnu
 [pr-screenshot-image]: https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-request-by-action-example.png
 [winget-pkgs-repo]: https://github.com/microsoft/winget-pkgs
-[komac-repo]: https://github.com/russellbanks/komac
-[russellbanks-github-profile]: https://github.com/russellbanks
 [pull-app-auto-update-forks]: https://github.com/wei/pull
 [gh-encrypted-secrets]: https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow
