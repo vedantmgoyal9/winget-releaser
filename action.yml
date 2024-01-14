@@ -39,16 +39,6 @@ runs:
         check-latest: true
         go-version: 1.x
 
-    - name: Install dependencies
-      if: runner.os != 'Windows'
-      run: |
-        if [ "$(uname)" == "Darwin" ]; then
-          brew install msitools
-        else
-          sudo apt-get install -y msitools libmsi-dev
-        fi
-      shell: bash
-
     - name: Validate inputs
       run: |
         # check if at least one version of the package is already present in winget-pkgs repository
@@ -67,8 +57,19 @@ runs:
         }
       shell: pwsh
 
-    - name: Install winget-pkgs-automation CLI
-      run: go install https://github.com/vedantmgoyal2009/winget-pkgs-automation@latest
+    - name: Install Komac
+      run: |
+        If ($IsWindows) { $cliExt = 'exe' }
+        Else { $cliOS = $IsMacOS ? '-macos' : '-linux'; $cliExt = 'tar.gz' }
+        Write-Output "OS: $($cliOS ? $cliOS.TrimStart('-') : 'windows'); Extension: $cliExt"
+        $komacUrl = "https://github.com/russellbanks/Komac/releases/download/v2.0.0/KomacPortable$($cliOS)-v2.0.0-x64.$cliExt"
+        Write-Output "Downloading Komac from $komacUrl"
+        Invoke-WebRequest -Uri $komacUrl -OutFile .\komac.$cliExt
+        Write-Output "Saved to komac.$cliExt"
+        If ($IsMacOS -or $IsLinux) {
+          Write-Output "Extracting komac from komac.$cliExt"
+          tar -xzf komac.$cliExt; rm komac.$cliExt; mv KomacPortable* komac
+        }
       shell: pwsh
 
     - name: Get release information
@@ -85,8 +86,18 @@ runs:
       shell: pwsh
 
     - name: Update & submit manifests
-      run: winget-pkgs-automation update '{{ inputs.identifier }}' '{{ steps.version-and-urls.outputs.version }}' --urls '{{ steps.version-and-urls.outputs.urls }}' -s --fork-user '{{ inputs.fork-user }}'
+      run: .\komac update --identifier '{{ inputs.identifier }}' --version '{{ steps.version-and-urls.outputs.version }}' --urls '{{ steps.version-and-urls.outputs.urls }}' --submit
       env:
+        KOMAC_FORK_USER: ${{ inputs.fork-user }}
+        KOMAC_CREATED_WITH: WinGet Releaser
+        KOMAC_CREATED_WITH_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_ACTION_REPOSITORY }}
+        GITHUB_TOKEN: ${{ inputs.token }}
+      shell: pwsh
+
+    - name: Clean up stale branches (for which PRs have been merged)
+      run: .\komac cleanup --only-merged
+      env:
+        KOMAC_FORK_USER: ${{ inputs.fork-user }}
         GITHUB_TOKEN: ${{ inputs.token }}
       shell: pwsh
 
@@ -94,7 +105,7 @@ runs:
       if: ${{ inputs.max-versions-to-keep }} > 0
       run: |
         $ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
-        $Versions = winget-pkgs-automation list-versions '{{ inputs.identifier }}' --json | ConvertFrom-Json | Sort-Object $ToNatural -Descending
+        $Versions = .\komac list-versions '{{ inputs.identifier }}' --json | ConvertFrom-Json | Sort-Object $ToNatural -Descending
         $Reason = 'This version is older than what has been set in `max-versions-to-keep` by the publisher.'
 
         If ($Versions.Count + 1 -gt {{ inputs.max-versions-to-keep }}) {
@@ -103,11 +114,16 @@ runs:
 
           ForEach ($Version in $VersionsToDelete) {
             Write-Output "Deleting version: $Version"
-            winget-pkgs-automation remove-version '{{ inputs.identifier }}' $Version --reason $Reason --fork-user '{{ inputs.fork-user }}'
+            .\komac remove --identifier '{{ inputs.identifier }}' --version $Version --reason "$Reason" --submit
           }
         } Else {
           Write-Output "No versions to delete. All good :)"
         }
+      env:
+        KOMAC_FORK_USER: ${{ inputs.fork-user }}
+        KOMAC_CREATED_WITH: WinGet Releaser
+        KOMAC_CREATED_WITH_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_ACTION_REPOSITORY }}
+        GITHUB_TOKEN: ${{ inputs.token }}
       shell: pwsh
 branding:
   color: blue
