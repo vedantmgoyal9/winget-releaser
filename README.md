@@ -17,15 +17,16 @@ expediting the amount of time it takes for a submission to be reviewed.
 
 ## Getting Started 🚀
 
-1. At least **one** version of your package should already be present in the
-   [Windows Package Manager Community Repository][winget-pkgs-repo]. The action will use that version as a base to create manifests for new versions of the package.
+> [!IMPORTANT]
+> At least **one** version of your package should already be present in the [Windows Package Manager Community Repository][winget-pkgs-repo].
+> The action will use that version as a base to create manifests for new versions of the package.
 
-2. You will need to create a _classic_ Personal Access Token (PAT) with `public_repo` scope. _New_ fine-grained PATs aren't supported by the action. Review https://github.com/vedantmgoyal2009/winget-releaser/issues/172 for information.
+1. You will need to create a _classic_ Personal Access Token (PAT) with `public_repo` scope. _New_ fine-grained PATs aren't supported by the action. Review https://github.com/vedantmgoyal2009/winget-releaser/issues/172 for information.
 
-3. Fork the [winget-pkgs][winget-pkgs-repo] repository under the same account/organization as your repository on which
+2. Fork the [winget-pkgs][winget-pkgs-repo] repository under the same account/organization as your repository on which
    you want to use this action. Ensure that the fork is up-to-date with the upstream repository. You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date with the upstream repository via automated pull requests.
 
-4. Add the action to your workflow file (e.g. `.github/workflows/<name>.yml`).
+3. Add the action to your workflow file (e.g. `.github/workflows/<name>.yml`).
 
 > [!IMPORTANT]
 > The action will only work when the release is **published** (not a draft), because the release assets (binaries) aren't available publicly until the release is published.
