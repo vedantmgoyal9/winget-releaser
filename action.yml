@@ -62,7 +62,7 @@ runs:
         If ($IsWindows) { $cliExt = 'exe' }
         Else { $cliOS = $IsMacOS ? '-macos' : '-linux'; $cliExt = 'tar.gz' }
         Write-Output "OS: $($cliOS ? $cliOS.TrimStart('-') : 'windows'); Extension: $cliExt"
-        $komacUrl = "https://github.com/russellbanks/Komac/releases/download/v2.0.0/KomacPortable$($cliOS)-v2.0.0-x64.$cliExt"
+        $komacUrl = "https://github.com/russellbanks/Komac/releases/download/v2.0.4/KomacPortable$($cliOS)-x64.$cliExt"
         Write-Output "Downloading Komac from $komacUrl"
         Invoke-WebRequest -Uri $komacUrl -OutFile .\komac.$cliExt
         Write-Output "Saved to komac.$cliExt"
@@ -88,7 +88,7 @@ runs:
     - name: Update & submit manifests
       run: .\komac update --identifier '{{ inputs.identifier }}' --version '{{ steps.version-and-urls.outputs.version }}' --urls '{{ steps.version-and-urls.outputs.urls }}' --submit
       env:
-        KOMAC_FORK_USER: ${{ inputs.fork-user }}
+        KOMAC_FORK_OWNER: ${{ inputs.fork-user }}
         KOMAC_CREATED_WITH: WinGet Releaser
         KOMAC_CREATED_WITH_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_ACTION_REPOSITORY }}
         GITHUB_TOKEN: ${{ inputs.token }}
@@ -97,7 +97,7 @@ runs:
     - name: Clean up stale branches (for which PRs have been merged)
       run: .\komac cleanup --only-merged
       env:
-        KOMAC_FORK_USER: ${{ inputs.fork-user }}
+        KOMAC_FORK_OWNER: ${{ inputs.fork-user }}
         GITHUB_TOKEN: ${{ inputs.token }}
       shell: pwsh
 
@@ -105,7 +105,7 @@ runs:
       if: ${{ inputs.max-versions-to-keep }} > 0
       run: |
         $ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
-        $Versions = .\komac list-versions '{{ inputs.identifier }}' --json | ConvertFrom-Json | Sort-Object $ToNatural -Descending
+        $Versions = .\komac list-versions --identifier '{{ inputs.identifier }}' --json | ConvertFrom-Json | Sort-Object $ToNatural -Descending
         $Reason = 'This version is older than what has been set in `max-versions-to-keep` by the publisher.'
 
         If ($Versions.Count + 1 -gt {{ inputs.max-versions-to-keep }}) {
@@ -120,7 +120,7 @@ runs:
           Write-Output "No versions to delete. All good :)"
         }
       env:
-        KOMAC_FORK_USER: ${{ inputs.fork-user }}
+        KOMAC_FORK_OWNER: ${{ inputs.fork-user }}
         KOMAC_CREATED_WITH: WinGet Releaser
         KOMAC_CREATED_WITH_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_ACTION_REPOSITORY }}
         GITHUB_TOKEN: ${{ inputs.token }}
