@@ -5,6 +5,7 @@
 ![GitHub release (latest by date)][github-release-badge]
 ![GitHub Repo stars][github-repo-stars-badge]
 ![GitHub][github-license-badge]
+[![Badge](https://img.shields.io/badge/docs.bittu.eu.org%2Fdocs%2Fwinget--releaser--playground-abcdef?style=flat&logo=windowsterminal&label=Playground%20(dry-run))][playground-link]
 
 Publish new releases of your application to the Windows Package Manager easily.
 
@@ -23,8 +24,9 @@ expediting the amount of time it takes for a submission to be reviewed.
 
 1. You will need to create a _classic_ Personal Access Token (PAT) with `public_repo` scope. _New_ fine-grained PATs aren't supported by the action. Review https://github.com/vedantmgoyal2009/winget-releaser/issues/172 for information.
 
-2. Fork the [winget-pkgs][winget-pkgs-repo] repository under the same account/organization as your repository on which
-   you want to use this action. Ensure that the fork is up-to-date with the upstream repository. You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date with the upstream repository via automated pull requests.
+2. Fork [microsoft/winget-pkgs][winget-pkgs-repo] under the same account/organization as the project's repository. If you are forking [winget-pkgs][winget-pkgs-repo] on a different account (e.g. bot/personal account), you can use the `fork-user` input to specify the username of the account where the fork is present.
+
+   - Ensure that the fork is up-to-date with the upstream. You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date via automated pull requests.
 
 3. Add the action to your workflow file (e.g. `.github/workflows/<name>.yml`).
 
@@ -155,7 +157,7 @@ jobs:
   - **Required**: ❌ (Default value: `.(exe|msi|msix|appx)(bundle){0,1}$`)
   - **Example**: `installers-regex: '\.exe$' # All EXE's`
 
-- `max-versions-to-keep`: The maximum number of versions of the package to keep in the [WinGet Community Repository][winget-pkgs-repo] repository. If after the current release, the number of versions exceeds this limit, the oldest version will be deleted.
+- `max-versions-to-keep`: The maximum number of versions of the package to keep in the [WinGet Community Repository][winget-pkgs-repo]. If after the current release, the number of versions exceeds this limit, the oldest version will be deleted.
 
   - **Required**: ❌ (Default value: `0` - unlimited)
   - **Example**: `max-versions-to-keep: 5 # keep only the latest 5 versions`
@@ -165,7 +167,7 @@ jobs:
   - **Required**: ❌ (Default value: `${{ github.event.release.tag_name || github.ref_name }}`)
   - **Example**: `release-tag: ${{ inputs.version }} # workflow_dispatch input 'version'`
 
-- `token`: The GitHub token with which the action will authenticate with GitHub API and create a pull request on the [WinGet Community Repository][winget-pkgs-repo] repository. **The token should have a `public_repo` scope.**
+- `token`: The GitHub token with which the action will authenticate with GitHub API and create a pull request on the [WinGet Community Repository][winget-pkgs-repo]. **The token should have a `public_repo` scope.**
 
   - **Required**: ✅
   - **Example**: `token: ${{ secrets.WINGET_TOKEN }} # Repository secret called 'WINGET_TOKEN'`
@@ -182,7 +184,7 @@ jobs:
 
 The action uses [Komac][komac-repo] under the hood to create manifests and publish them to the [Windows Package Manager Community Repository][winget-pkgs-repo] because of its unique capability to update installer URLs with respect to architecture, installer type, scope, etc.
 
-I thank [Russell Banks][russellbanks-github-profile], the creator of Komac, for creating such an amazing & wonderful winget manifest creator, which is the core of this action. Again, it is because of Komac that the action can now be used on any platform (Windows, Linux, macOS) and not just Windows (as it was before).
+I'm grateful to [Russell Banks][russellbanks-github-profile], the creator of Komac, for creating such an amazing & wonderful winget manifest creator, which is the core of this action. Again, it is because of Komac that the action can now be used on any platform (Windows, Linux, macOS) and not just Windows (as it was before).
 
 ## 🌟 Stargazers over time 👀
 
@@ -238,6 +240,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification.
 Contributions of any kind welcome!
 
+[playground-link]: https://docs.bittu.eu.org/docs/winget-releaser-playground
 [dependabot-setup-guide]: https://docs.github.com/en/code-security/dependabot/working-with-dependabot/keeping-your-actions-up-to-date-with-dependabot#example-dependabotyml-file-for-github-actions
 [github-all-contributors-badge]: https://img.shields.io/github/all-contributors/vedantmgoyal2009/winget-releaser/main?logo=opensourceinitiative&logoColor=white
 [github-issues-badge]: https://img.shields.io/github/issues/vedantmgoyal2009/winget-releaser?logo=target
