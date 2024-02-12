@@ -62,7 +62,7 @@ runs:
         If ($IsWindows) { $cliExt = 'exe' }
         Else { $cliOS = $IsMacOS ? '-macos' : '-linux'; $cliExt = 'tar.gz' }
         Write-Output "OS: $($cliOS ? $cliOS.TrimStart('-') : 'windows'); Extension: $cliExt"
-        $komacUrl = "https://github.com/russellbanks/Komac/releases/download/v2.0.4/KomacPortable$($cliOS)-x64.$cliExt"
+        $komacUrl = "https://github.com/russellbanks/Komac/releases/download/v2.0.4/KomacPortable$($cliOS)-$($env:RUNNER_OS.ToLower()).$cliExt"
         Write-Output "Downloading Komac from $komacUrl"
         Invoke-WebRequest -Uri $komacUrl -OutFile .\komac.$cliExt
         Write-Output "Saved to komac.$cliExt"
