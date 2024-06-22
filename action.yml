@@ -34,7 +34,7 @@ inputs:
   clean-stale-branch:
     required: false
     description: Clean up stale branches or not
-    default: false
+    default: true
 runs:
   using: composite
   steps:
