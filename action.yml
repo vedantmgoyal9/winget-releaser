@@ -31,6 +31,10 @@ inputs:
     required: true
     description: GitHub username where the fork of winget-pkgs is present.
     default: ${{ github.repository_owner }}
+  clean-stale-branch:
+    required: false
+    description: Clean up stale branches or not
+    default: false
 runs:
   using: composite
   steps:
@@ -95,6 +99,7 @@ runs:
       shell: pwsh
 
     - name: Clean up stale branches (for which PRs have been merged)
+      if: ${{ inputs.clean-stale-branch }}
       run: .\komac cleanup --only-merged
       env:
         KOMAC_FORK_OWNER: ${{ inputs.fork-user }}
