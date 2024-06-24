@@ -1,10 +1,11 @@
-<h1> <img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/github-actions-logo.png" width="32" height="32" alt="Logo" /> WinGet Releaser (GitHub Action) </h1>
+<h1> <img src="https://github.com/vedantmgoyal9/winget-releaser/blob/main/.github/github-actions-logo.png" width="32" height="32" alt="Logo" /> WinGet Releaser (GitHub Action) </h1>
 
 ![GitHub contributors (via allcontributors.org)][github-all-contributors-badge]
 ![GitHub issues][github-issues-badge]
 ![GitHub release (latest by date)][github-release-badge]
 ![GitHub Repo stars][github-repo-stars-badge]
 ![GitHub][github-license-badge]
+[![Badge](https://img.shields.io/badge/docs.bittu.eu.org%2Fdocs%2Fwinget--releaser--playground-abcdef?style=flat&logo=windowsterminal&label=Playground%20(dry-run))][playground-link]
 
 Publish new releases of your application to the Windows Package Manager easily.
 
@@ -21,10 +22,11 @@ expediting the amount of time it takes for a submission to be reviewed.
 > At least **one** version of your package should already be present in the [Windows Package Manager Community Repository][winget-pkgs-repo].
 > The action will use that version as a base to create manifests for new versions of the package.
 
-1. You will need to create a _classic_ Personal Access Token (PAT) with `public_repo` scope. _New_ fine-grained PATs aren't supported by the action. Review https://github.com/vedantmgoyal2009/winget-releaser/issues/172 for information.
+1. You will need to create a _classic_ Personal Access Token (PAT) with `public_repo` scope. _New_ fine-grained PATs aren't supported by the action. Review https://github.com/vedantmgoyal9/winget-releaser/issues/172 for information.
 
-2. Fork the [winget-pkgs][winget-pkgs-repo] repository under the same account/organization as your repository on which
-   you want to use this action. Ensure that the fork is up-to-date with the upstream repository. You can use **[<img src="https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date with the upstream repository via automated pull requests.
+2. Fork [microsoft/winget-pkgs][winget-pkgs-repo] under the same account/organization as the project's repository. If you are forking [winget-pkgs][winget-pkgs-repo] on a different account (e.g. bot/personal account), you can use the `fork-user` input to specify the username of the account where the fork is present.
+
+   - Ensure that the fork is up-to-date with the upstream. You can use **[<img src="https://github.com/vedantmgoyal9/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date via automated pull requests.
 
 3. Add the action to your workflow file (e.g. `.github/workflows/<name>.yml`).
 
@@ -55,7 +57,7 @@ jobs:
   publish:
     runs-on: windows-latest
     steps:
-      - uses: vedantmgoyal2009/winget-releaser@v2
+      - uses: vedantmgoyal9/winget-releaser@main
         with:
           identifier: Package.Identifier
           max-versions-to-keep: 5 # keep only latest 5 versions
@@ -74,7 +76,7 @@ jobs:
   publish:
     runs-on: windows-latest
     steps:
-      - uses: vedantmgoyal2009/winget-releaser@v2
+      - uses: vedantmgoyal9/winget-releaser@main
         with:
           identifier: Package.Identifier
           installers-regex: '\.exe$' # Only .exe files
@@ -94,13 +96,13 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Publish X to WinGet
-        uses: vedantmgoyal2009/winget-releaser@v2
+        uses: vedantmgoyal9/winget-releaser@main
         with:
           identifier: Package.Identifier<X>
           installers-regex: '\.exe$' # Only .exe files
           token: ${{ secrets.WINGET_TOKEN }}
       - name: Publish Y to WinGet
-        uses: vedantmgoyal2009/winget-releaser@v2
+        uses: vedantmgoyal9/winget-releaser@main
         with:
           identifier: Package.Identifier<Y>
           installers-regex: '\.msi$' # Only .msi files
@@ -126,7 +128,7 @@ jobs:
           $VERSION="${{ github.event.release.name }}" -replace '^.*/ '
           "version=$VERSION" >> $env:GITHUB_OUTPUT
         shell: pwsh
-      - uses: vedantmgoyal2009/winget-releaser@v2
+      - uses: vedantmgoyal9/winget-releaser@main
         with:
           identifier: Package.Identifier
           version: ${{ steps.get-version.outputs.version }}
@@ -155,7 +157,7 @@ jobs:
   - **Required**: ❌ (Default value: `.(exe|msi|msix|appx)(bundle){0,1}$`)
   - **Example**: `installers-regex: '\.exe$' # All EXE's`
 
-- `max-versions-to-keep`: The maximum number of versions of the package to keep in the [WinGet Community Repository][winget-pkgs-repo] repository. If after the current release, the number of versions exceeds this limit, the oldest version will be deleted.
+- `max-versions-to-keep`: The maximum number of versions of the package to keep in the [WinGet Community Repository][winget-pkgs-repo]. If after the current release, the number of versions exceeds this limit, the oldest version will be deleted.
 
   - **Required**: ❌ (Default value: `0` - unlimited)
   - **Example**: `max-versions-to-keep: 5 # keep only the latest 5 versions`
@@ -165,7 +167,7 @@ jobs:
   - **Required**: ❌ (Default value: `${{ github.event.release.tag_name || github.ref_name }}`)
   - **Example**: `release-tag: ${{ inputs.version }} # workflow_dispatch input 'version'`
 
-- `token`: The GitHub token with which the action will authenticate with GitHub API and create a pull request on the [WinGet Community Repository][winget-pkgs-repo] repository. **The token should have a `public_repo` scope.**
+- `token`: The GitHub token with which the action will authenticate with GitHub API and create a pull request on the [WinGet Community Repository][winget-pkgs-repo]. **The token should have a `public_repo` scope.**
 
   - **Required**: ✅
   - **Example**: `token: ${{ secrets.WINGET_TOKEN }} # Repository secret called 'WINGET_TOKEN'`
@@ -178,9 +180,15 @@ jobs:
   - **Required**: ❌ (Default value: `${{ github.repository_owner }} # repository owner`)
   - **Example**: `fork-user: dotnet-winget-bot # for example purposes only`
 
+<h2> 🚀 Integrating with <a href="https://github.com/russellbanks/Komac"> <img src="https://github.com/vedantmgoyal9/winget-releaser/blob/main/.github/komac-logo.svg" height="24px" style="vertical-align:bottom" alt="Komac logo" /> </a> - Supercharging WinGet Releaser </h1>
+
+The action uses [Komac][komac-repo] under the hood to create manifests and publish them to the [Windows Package Manager Community Repository][winget-pkgs-repo] because of its unique capability to update installer URLs with respect to architecture, installer type, scope, etc.
+
+I'm grateful to [Russell Banks][russellbanks-github-profile], the creator of Komac, for creating such an amazing & wonderful winget manifest creator, which is the core of this action. Again, it is because of Komac that the action can now be used on any platform (Windows, Linux, macOS) and not just Windows (as it was before).
+
 ## 🌟 Stargazers over time 👀
 
-[![Stargazers over time](https://starchart.cc/vedantmgoyal2009/winget-releaser.svg)](https://starchart.cc/vedantmgoyal2009/winget-releaser)
+[![Stargazers over time](https://starchart.cc/vedantmgoyal9/winget-releaser.svg)](https://starchart.cc/vedantmgoyal9/winget-releaser)
 
 ## Contributors ✨
 
@@ -232,13 +240,16 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification.
 Contributions of any kind welcome!
 
+[playground-link]: https://docs.bittu.eu.org/docs/winget-releaser-playground
 [dependabot-setup-guide]: https://docs.github.com/en/code-security/dependabot/working-with-dependabot/keeping-your-actions-up-to-date-with-dependabot#example-dependabotyml-file-for-github-actions
-[github-all-contributors-badge]: https://img.shields.io/github/all-contributors/vedantmgoyal2009/winget-releaser/main?logo=opensourceinitiative&logoColor=white
-[github-issues-badge]: https://img.shields.io/github/issues/vedantmgoyal2009/winget-releaser?logo=target
-[github-release-badge]: https://img.shields.io/github/v/release/vedantmgoyal2009/winget-releaser?logo=github
-[github-repo-stars-badge]: https://img.shields.io/github/stars/vedantmgoyal2009/winget-releaser?logo=githubsponsors
-[github-license-badge]: https://img.shields.io/github/license/vedantmgoyal2009/winget-releaser?logo=gnu
-[pr-screenshot-image]: https://github.com/vedantmgoyal2009/winget-releaser/blob/main/.github/pull-request-by-action-example.png
+[github-all-contributors-badge]: https://img.shields.io/github/all-contributors/vedantmgoyal9/winget-releaser/main?logo=opensourceinitiative&logoColor=white
+[github-issues-badge]: https://img.shields.io/github/issues/vedantmgoyal9/winget-releaser?logo=target
+[github-release-badge]: https://img.shields.io/github/v/release/vedantmgoyal9/winget-releaser?logo=github
+[github-repo-stars-badge]: https://img.shields.io/github/stars/vedantmgoyal9/winget-releaser?logo=githubsponsors
+[github-license-badge]: https://img.shields.io/github/license/vedantmgoyal9/winget-releaser?logo=gnu
+[pr-screenshot-image]: https://github.com/vedantmgoyal9/winget-releaser/blob/main/.github/pull-request-by-action-example.png
 [winget-pkgs-repo]: https://github.com/microsoft/winget-pkgs
+[komac-repo]: https://github.com/russellbanks/komac
+[russellbanks-github-profile]: https://github.com/russellbanks
 [pull-app-auto-update-forks]: https://github.com/wei/pull
 [gh-encrypted-secrets]: https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow

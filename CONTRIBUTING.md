@@ -6,7 +6,7 @@ Ensure you've read through the documentation so you understand the core concepts
 
 ### How to report a bug
 
-1. Search the [issues](https://github.com/vedantmgoyal2009/winget-releaser/issues) to see if the bug has already been reported by someone else, and/or if it has been already fixed in the latest version.
+1. Search the [issues](https://github.com/vedantmgoyal9/winget-releaser/issues) to see if the bug has already been reported by someone else, and/or if it has been already fixed in the latest version.
 2. If you don't find anything, create a new issue with the following information:
    - A clear and concise description of what the bug is.
    - Steps to reproduce the bug.
