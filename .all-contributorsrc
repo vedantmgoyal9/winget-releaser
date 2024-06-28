@@ -228,6 +228,15 @@
         "doc",
         "ideas"
       ]
+    },
+    {
+      "login": "rhysd",
+      "name": "Linda_pp",
+      "avatar_url": "https://avatars.githubusercontent.com/u/823277?v=4",
+      "profile": "https://rhysd.github.io/",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "commitType": "docs"
