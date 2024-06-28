@@ -4,6 +4,7 @@
   ],
   "imageSize": 90,
   "commit": true,
+  "commitType": "docs",
   "contributorsPerLine": 7,
   "contributorsSortAlphabetically": true,
   "projectName": "winget-releaser",
@@ -257,6 +258,15 @@
       ]
     },
     {
+      "login": "grofit",
+      "name": "LP",
+      "avatar_url": "https://avatars.githubusercontent.com/u/927201?v=4",
+      "profile": "https://github.com/grofit",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
       "login": "OpenWaygate",
       "name": "Chaoqun",
       "avatar_url": "https://avatars.githubusercontent.com/u/27287694?v=4",
@@ -265,6 +275,5 @@
         "bug"
       ]
     }
-  ],
-  "commitType": "docs"
+  ]
 }
