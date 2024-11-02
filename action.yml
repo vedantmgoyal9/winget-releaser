@@ -90,7 +90,8 @@ runs:
       run: |
         # delete previous versions w.r.t. max-versions-to-keep (if any) 
         $ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
-        $Versions = komac list-versions '${{ inputs.identifier }}' --json | ConvertFrom-Json | Sort-Object $ToNatural -Descending
+        #[Issue #307] -NoEnumerate has been added so that $Versions does not get converted to a string, when only one version exists in winget-pkgs
+        $Versions = komac list-versions '${{ inputs.identifier }}' --json | ConvertFrom-Json -NoEnumerate | Sort-Object $ToNatural -Descending
         $Reason = 'This version is older than what has been set in `max-versions-to-keep` by the publisher.'
 
         If ($Versions.Count + 1 -gt ${{ inputs.max-versions-to-keep }}) {
