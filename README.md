@@ -11,10 +11,11 @@ Publish new releases of your application to the Windows Package Manager easily.
 
 ![pr-example-screenshot][pr-screenshot-image]
 
-Creating manifests and pull requests for every release of your application can be time-consuming and error-prone.
+Creating WinGet manifests and submitting them at [WinGet Community Repository][winget-pkgs-repo] for every release of
+your application can be tedious and error-prone.
 
 WinGet Releaser allows you to automate this process, with pull requests that are trusted amongst the community, often
-expediting the amount of time it takes for a submission to be reviewed.
+expediting the amount of time it takes for a submission to be reviewed and published to WinGet.
 
 ## Getting Started 🚀
 
@@ -143,13 +144,13 @@ jobs:
 
 | Option | Description | Notes |
 | --- | --- | ---|
-| `identifier` **(Mandatory)** | The package identifier of the package in [WinGet Community Repository][winget-pkgs-repo] | **Example**: `identifier: Publisher.Package # Microsoft.Excel` |
-| `version` (Optional) | The `PackageVersion` of the package | **Default**: release tag, excluding `v` prefix: `v1.0.0` -> `1.0.0`) <br> **Example**: `version: ${{ github.event.release.tag_name }} # For tags without the 'v' prefix` |
-| `installers-regex` (Optional) | A **Reg**ular **Ex**pression to match the installers from the release artifacts to publish to WinGet | **Default**: `.(exe\|msi\|msix\|appx)(bundle){0,1}$` <br> **Example**: `installers-regex: '\.exe$' # All EXE's` |
-| `max-versions-to-keep` (Optional) | The maximum number of versions of the package to keep in the [WinGet Community Repository][winget-pkgs-repo]. If after the current release, the number of versions exceeds this limit, the oldest version will be deleted. | **Default**: `0` (unlimited) <br> **Example**: `max-versions-to-keep: 5 # latest 5 versions only` |
-| `release-tag` (Optional) | The GitHub release tag of the release you want to publish to Windows Package Manager (WinGet) | **Default**: `${{ github.event.release.tag_name \|\| github.ref_name }}` <br> **Example**: `release-tag: ${{ inputs.version }} # workflow_dispatch input 'version'` |
-| `fork-user` (Optional) | The GitHub user where [winget-pkgs][winget-pkgs-repo] fork is present. This fork will be used to create the pull request at [WinGet Community Repository][winget-pkgs-repo]. | **Default**: `${{ github.repository_owner }} # repository owner` <br> **Example**: `fork-user: dotnet-winget-bot # example only` |
-| `token` **(Mandatory)** | The GitHub token with which the action will authenticate with GitHub API and create a pull request on the [WinGet Community Repository][winget-pkgs-repo]. **The token should have a `public_repo` scope.** | **Example**: `token: ${{ secrets.WINGET_TOKEN }} # Repository secret called 'WINGET_TOKEN'` |
+| `identifier` **(Mandatory)** | The `PackageIdentifier` of the app in WinGet | **Example**: `Microsoft.PowerToys` |
+| `version` (Optional) | The `PackageVersion` of the application | **Default**: release tag, excluding `v` prefix <br> (e.g. `v1.0.0` -> `1.0.0`) <br> **Example**: `${{ github.event.release.tag_name }} # For tags without the 'v' prefix` |
+| `installers-regex` (Optional) | A **Reg**ular **Ex**pression to match Windows installers/binaries from GitHub release artifacts | **Default**: `.(exe\|msi\|msix\|appx)(bundle){0,1}$` <br> **Example**: `\.exe$` (All files ending with .exe) |
+| `max-versions-to-keep` (Optional) | The maximum number of versions of the package to keep in WinGet. If after the current release, the number of versions exceeds this limit, the oldest version will be deleted. | **Default**: `0` (unlimited) <br> **Example**: `3` (latest 3 versions only) |
+| `release-tag` (Optional) | The tag of the GitHub release you want to publish to Windows Package Manager (WinGet) | **Default**: `${{ github.event.release.tag_name \|\| github.ref_name }}` <br> **Example**: `release-tag: ${{ inputs.version }} # workflow_dispatch input 'version'` |
+| `fork-user` (Optional) | The GitHub user where [winget-pkgs][winget-pkgs-repo] fork is present. This fork will be used to create PR at [WinGet Community Repository][winget-pkgs-repo]. | **Default**: `${{ github.repository_owner }} # repository owner` <br> **Example**: `dotnet-winget-bot` |
+| `token` **(Mandatory)** | GitHub token to create PR at [winget-pkgs][winget-pkgs-repo]. **The token should have a `public_repo` scope.** | **Example**: `token: ${{ secrets.WINGET_TOKEN }} # Repository secret called 'WINGET_TOKEN'` |
 
 > [!WARNING]
 > Do **not** directly put the token in the action. Instead, create a repository secret containing the token and use that in the workflow. Refer to [using encrypted secrets in a workflow][gh-encrypted-secrets] for more information.
