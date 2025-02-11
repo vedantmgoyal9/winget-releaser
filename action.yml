@@ -74,6 +74,11 @@ runs:
         GITHUB_TOKEN: ${{ github.token }}
       id: version-and-urls
       shell: pwsh
+    - run: komac sync-fork
+      env:
+        KOMAC_FORK_OWNER: ${{ inputs.fork-user }}
+        GITHUB_TOKEN: ${{ inputs.token }}
+      shell: pwsh
     - run: komac update '${{ inputs.identifier }}' --version '${{ steps.version-and-urls.outputs.version }}' --submit --urls ${{ steps.version-and-urls.outputs.urls }}
       env:
         KOMAC_FORK_OWNER: ${{ inputs.fork-user }}

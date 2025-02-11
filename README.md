@@ -5,7 +5,7 @@
 ![GitHub release (latest by date)][github-release-badge]
 ![GitHub Repo stars][github-repo-stars-badge]
 ![GitHub][github-license-badge]
-[![Badge](https://img.shields.io/badge/docs.bittu.eu.org%2Fdocs%2Fwinget--releaser--playground-abcdef?style=flat&logo=windowsterminal&label=Playground%20(dry-run))][playground-link]
+[![Badge](<https://img.shields.io/badge/docs.bittu.eu.org%2Fdocs%2Fwinget--releaser--playground-abcdef?style=flat&logo=windowsterminal&label=Playground%20(dry-run)>)][playground-link]
 
 Publish new releases of your application to the Windows Package Manager easily.
 
@@ -25,8 +25,6 @@ expediting the amount of time it takes for a submission to be reviewed.
 1. You will need to create a _classic_ Personal Access Token (PAT) with `public_repo` scope. _New_ fine-grained PATs aren't supported by the action. Review https://github.com/vedantmgoyal9/winget-releaser/issues/172 for information.
 
 2. Fork [microsoft/winget-pkgs][winget-pkgs-repo] under the same account/organization as the project's repository. If you are forking [winget-pkgs][winget-pkgs-repo] on a different account (e.g. bot/personal account), you can use the `fork-user` input to specify the username of the account where the fork is present.
-
-   - Ensure that the fork is up-to-date with the upstream. You can use **[<img src="https://github.com/vedantmgoyal9/winget-releaser/blob/main/.github/pull-app-logo.svg" valign="bottom"/> Pull App][pull-app-auto-update-forks]** which keeps your fork up-to-date via automated pull requests.
 
 3. Add the action to your workflow file (e.g. `.github/workflows/<name>.yml`).
 
@@ -261,5 +259,4 @@ Contributions of any kind welcome!
 [winget-pkgs-repo]: https://github.com/microsoft/winget-pkgs
 [komac-repo]: https://github.com/russellbanks/komac
 [russellbanks-github-profile]: https://github.com/russellbanks
-[pull-app-auto-update-forks]: https://github.com/wei/pull
 [gh-encrypted-secrets]: https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow
