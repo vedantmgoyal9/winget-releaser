@@ -294,6 +294,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "UnownPlain",
+      "name": "UnownPlain",
+      "avatar_url": "https://avatars.githubusercontent.com/u/38232575?v=4",
+      "profile": "http://unownplain.dev",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
     }
   ]
 }
