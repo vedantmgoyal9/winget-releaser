@@ -165,6 +165,11 @@ jobs:
   - **Required**: ❌ (Default value: `${{ github.event.release.tag_name || github.ref_name }}`)
   - **Example**: `release-tag: ${{ inputs.version }} # workflow_dispatch input 'version'`
 
+- `release-notes-url`: URL to package version's release notes.
+
+  - **Required**: ❌ (Default value: GitHub release page)
+  - **Example**: `release-notes-url: https://example.com/release-notes/${{ github.event.release.tag_name }}`
+
 - `token`: The GitHub token with which the action will authenticate with GitHub API and create a pull request on the [WinGet Community Repository][winget-pkgs-repo]. **The token should have a `public_repo` scope.**
 
   - **Required**: ✅
