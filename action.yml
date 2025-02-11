@@ -24,6 +24,9 @@ inputs:
     required: true
     description: The release tag to be used for creating manifests.
     default: ${{ github.event.release.tag_name || github.ref_name }}
+  release-notes-url:
+    required: false
+    description: Package version's release notes URL. Defaults to GitHub release page.
   token:
     required: true
     description: GitHub token to create pull request on Windows Package Manager Community Repository.
@@ -79,7 +82,17 @@ runs:
         KOMAC_FORK_OWNER: ${{ inputs.fork-user }}
         GITHUB_TOKEN: ${{ inputs.token }}
       shell: pwsh
-    - run: komac update '${{ inputs.identifier }}' --version '${{ steps.version-and-urls.outputs.version }}' --submit --urls ${{ steps.version-and-urls.outputs.urls }}
+    - run: |
+        $ReplaceFlag = ""
+        $ReleaseNotesUrlFlag = ""
+        if (${{ inputs.max-versions-to-keep }} -eq 1) {
+          $ReplaceFlag = "--replace"
+        }
+        if (-not [string]::IsNullOrEmpty('${{ inputs.release-notes-url }}')) {
+          $ReleaseNotesUrlFlag = "--replace-notes-url '${{ inputs.release-notes-url }}'"
+        }
+
+        komac update '${{ inputs.identifier }}' --version '${{ steps.version-and-urls.outputs.version }}' $ReplaceFlag  $ReleaseNotesUrlFlag --submit --urls ${{ steps.version-and-urls.outputs.urls }}
       env:
         KOMAC_FORK_OWNER: ${{ inputs.fork-user }}
         KOMAC_CREATED_WITH: WinGet Releaser
@@ -98,6 +111,11 @@ runs:
         #[Issue #307] -NoEnumerate has been added so that $Versions does not get converted to a string, when only one version exists in winget-pkgs
         $Versions = komac list-versions '${{ inputs.identifier }}' --json | ConvertFrom-Json -NoEnumerate | Sort-Object $ToNatural -Descending
         $Reason = 'This version is older than what has been set in `max-versions-to-keep` by the publisher.'
+
+        # Prevents replaced version from being deleted
+        if (${{ inputs.max-versions-to-keep }} -eq 1) {
+          $Versions = $Versions | Select-Object -SkipLast 1
+        }
 
         If ($Versions.Count + 1 -gt ${{ inputs.max-versions-to-keep }}) {
           $VersionsToDelete = $Versions[(${{ inputs.max-versions-to-keep }} - 1)..($Versions.Count - 1)]
