@@ -141,14 +141,15 @@ jobs:
 ## Configuration Options ⚒️
 
 | Option | Description | Notes |
-| --- | --- | ---|
-| `identifier` **(Mandatory)** | The `PackageIdentifier` of the app in WinGet | **Example**: `Microsoft.PowerToys` |
-| `version` (Optional) | The `PackageVersion` of the application | **Default**: release tag, excluding `v` prefix <br> (e.g. `v1.0.0` -> `1.0.0`) <br> **Example**: `${{ github.event.release.tag_name }} # For tags without the 'v' prefix` |
-| `installers-regex` (Optional) | A **Reg**ular **Ex**pression to match Windows installers/binaries from GitHub release artifacts | **Default**: `.(exe\|msi\|msix\|appx)(bundle){0,1}$` <br> **Example**: `\.exe$` (All files ending with .exe) |
+|---|---|---|
+| `identifier` **(Mandatory)** | The `PackageIdentifier` of the app in WinGet. | **Example**: `Microsoft.PowerToys` |
+| `version` (Optional) | The `PackageVersion` of the application. | **Default**: Release tag, excluding `v` prefix <br> (e.g. `v1.0.0` -> `1.0.0`) <br> **Example**: `${{ github.event.release.tag_name }} # For tags without the 'v' prefix` |
+| `installers-regex` (Optional) | A **Reg**ular **Ex**pression to match Windows installers/binaries from GitHub release artifacts. | **Default**: `.(exe\|msi\|msix\|appx)(bundle){0,1}$` <br> **Example**: `\.exe$` (All files ending with .exe) |
 | `max-versions-to-keep` (Optional) | The maximum number of versions of the package to keep in WinGet. If after the current release, the number of versions exceeds this limit, the oldest version will be deleted. | **Default**: `0` (unlimited) <br> **Example**: `3` (latest 3 versions only) |
-| `release-tag` (Optional) | The tag of the GitHub release you want to publish to Windows Package Manager (WinGet) | **Default**: `${{ github.event.release.tag_name \|\| github.ref_name }}` <br> **Example**: `release-tag: ${{ inputs.version }} # workflow_dispatch input 'version'` |
+| `release-tag` (Optional) | The tag of the GitHub release you want to publish to Windows Package Manager (WinGet). | **Default**: `${{ github.event.release.tag_name \|\| github.ref_name }}` <br> **Example**: `release-tag: ${{ inputs.version }} # workflow_dispatch input 'version'` |
 | `fork-user` (Optional) | The GitHub user where [winget-pkgs][winget-pkgs-repo] fork is present. This fork will be used to create PR at [WinGet Community Repository][winget-pkgs-repo]. | **Default**: `${{ github.repository_owner }} # repository owner` <br> **Example**: `dotnet-winget-bot` |
 | `token` **(Mandatory)** | GitHub token to create PR at [winget-pkgs][winget-pkgs-repo]. **The token should have a `public_repo` scope.** | **Example**: `token: ${{ secrets.WINGET_TOKEN }} # Repository secret called 'WINGET_TOKEN'` |
+| `release-notes-url` (Optional) | URL to package version's release notes. | **Default**: GitHub release page <br> **Example**: `release-notes-url: https://example.com/release-notes/${{ github.event.release.tag_name }}` |
 
 > [!WARNING]
 > Do **not** directly put the token in the action. Instead, create a repository secret containing the token and use that in the workflow. Refer to [using encrypted secrets in a workflow][gh-encrypted-secrets] for more information.
