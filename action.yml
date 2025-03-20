@@ -4,35 +4,26 @@ author: vedantmgoyal9 (Vedant)
 inputs:
   identifier:
     required: true
-    description: The PackageIdentifier of the package (case-sensitive).
   version:
     required: false
-    description: The PackageVersion of the package you want to release.
   installers-regex:
     required: true
-    description: The regex to match the installers.
     default: '.(exe|msi|msix|appx)(bundle){0,1}$'
   max-versions-to-keep:
     required: true
-    description: 'The maximum number of versions to keep in WinGet Community Repository (Default: 0 - no limit)'
     default: '0'
   release-repository:
     required: true
-    description: The repository where the release is present (should be present under same user/organization).
     default: ${{ github.event.repository.name }}
   release-tag:
     required: true
-    description: The release tag to be used for creating manifests.
     default: ${{ github.event.release.tag_name || github.ref_name }}
   release-notes-url:
     required: false
-    description: Package version's release notes URL. Defaults to GitHub release page.
   token:
     required: true
-    description: GitHub token to create pull request on Windows Package Manager Community Repository.
   fork-user:
     required: true
-    description: GitHub username where the fork of winget-pkgs is present.
     default: ${{ github.repository_owner }}
 runs:
   using: composite
