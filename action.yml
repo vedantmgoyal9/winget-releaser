@@ -74,15 +74,15 @@ runs:
         GITHUB_TOKEN: ${{ inputs.token }}
       shell: pwsh
     - run: |
-        $ReplaceFlag = ""
-        $ReleaseNotesUrlFlag = ""
+        $ReplaceFlag = $Null
+        $ReleaseNotesUrlFlag = $Null
         if (${{ inputs.max-versions-to-keep }} -eq 1) {
           $ReplaceFlag = "--replace"
         }
         if (-not [string]::IsNullOrEmpty('${{ inputs.release-notes-url }}')) {
-          $ReleaseNotesUrlFlag = "--release-notes-url '${{ inputs.release-notes-url }}'"
+          # multiple arguments should be provided as an array of strings to ensure powershell passes them to komac correctly
+          $ReleaseNotesUrlFlag = @('--release-notes-url', '${{ inputs.release-notes-url }}')
         }
-
         komac update '${{ inputs.identifier }}' --version '${{ steps.version-and-urls.outputs.version }}' $ReplaceFlag  $ReleaseNotesUrlFlag --submit --urls ${{ steps.version-and-urls.outputs.urls }}
       env:
         KOMAC_FORK_OWNER: ${{ inputs.fork-user }}
