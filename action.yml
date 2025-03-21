@@ -80,7 +80,7 @@ runs:
           $ReplaceFlag = "--replace"
         }
         if (-not [string]::IsNullOrEmpty('${{ inputs.release-notes-url }}')) {
-          $ReleaseNotesUrlFlag = "--replace-notes-url '${{ inputs.release-notes-url }}'"
+          $ReleaseNotesUrlFlag = "--release-notes-url '${{ inputs.release-notes-url }}'"
         }
 
         komac update '${{ inputs.identifier }}' --version '${{ steps.version-and-urls.outputs.version }}' $ReplaceFlag  $ReleaseNotesUrlFlag --submit --urls ${{ steps.version-and-urls.outputs.urls }}
