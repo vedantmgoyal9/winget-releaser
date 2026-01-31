@@ -49,7 +49,7 @@ runs:
     - uses: cargo-bins/cargo-binstall@main
       env:
         GITHUB_TOKEN: ${{ github.token }}
-    - run: cargo binstall komac -y
+    - run: cargo-binstall komac -y
       env:
         GITHUB_TOKEN: ${{ github.token }}
       shell: pwsh
