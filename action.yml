@@ -1,30 +1,41 @@
 name: WinGet Releaser
 description: Publish new releases of your application to Windows Package Manager easily.
 author: vedantmgoyal9 (Vedant)
+
 inputs:
   identifier:
+    description: The `PackageIdentifier` of the app in WinGet.
     required: true
   version:
+    description: The `PackageVersion` of the application. Defaults to the release tag, excluding the 'v' prefix.
     required: false
   installers-regex:
+    description: A regular expression to match Windows installers/binaries from GitHub release artifacts.
     required: true
     default: '.(exe|msi|msix|appx)(bundle){0,1}$'
   max-versions-to-keep:
+    description: The maximum number of versions of the package to keep in WinGet. If after the current release, the number of versions exceeds this limit, the oldest versions will be deleted. Leave unset for unlimited.
     required: true
     default: '0'
   release-repository:
+    description: The repository where the release is located.
     required: true
     default: ${{ github.event.repository.name }}
   release-tag:
+    description: The tag of the GitHub release you want to publish to WinGet.
     required: true
     default: ${{ github.event.release.tag_name || github.ref_name }}
   release-notes-url:
+    description: URL to the package version's release notes.
     required: false
   token:
+    description: GitHub token to create PR at winget-pkgs. The token should have a `public_repo` scope.
     required: true
   fork-user:
+    description: The GitHub user where winget-pkgs fork is present. This fork will be used to create the PR at the WinGet Community Repository.
     required: true
     default: ${{ github.repository_owner }}
+
 runs:
   using: composite
   steps:
