@@ -54,7 +54,7 @@ on:
     types: [released]
 jobs:
   publish:
-    runs-on: windows-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: vedantmgoyal9/winget-releaser@main
         with:
@@ -73,7 +73,7 @@ on:
     types: [released]
 jobs:
   publish:
-    runs-on: windows-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: vedantmgoyal9/winget-releaser@main
         with:
@@ -92,7 +92,7 @@ on:
     types: [released]
 jobs:
   publish:
-    runs-on: windows-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Publish X to WinGet
         uses: vedantmgoyal9/winget-releaser@main
@@ -118,7 +118,7 @@ on:
     types: [released]
 jobs:
   publish:
-    runs-on: windows-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Get version
         id: get-version
