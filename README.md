@@ -23,7 +23,7 @@ expediting the amount of time it takes for a submission to be reviewed and publi
 > At least **one** version of your package should already be present in the [Windows Package Manager Community Repository][winget-pkgs-repo].
 > The action will use that version as a base to create manifests for new versions of the package.
 
-1. You will need to create a _classic_ Personal Access Token (PAT) with `public_repo` scope. _New_ fine-grained PATs aren't supported by the action. Review https://github.com/vedantmgoyal9/winget-releaser/issues/172 for information.
+1. You will need to create a _classic_ Personal Access Token (PAT) with `repo` scope. _New_ fine-grained PATs aren't supported by the action. Review https://github.com/vedantmgoyal9/winget-releaser/issues/172 for information.
 
 2. Fork [microsoft/winget-pkgs][winget-pkgs-repo] under the same account/organization as the project's repository. If you are forking [winget-pkgs][winget-pkgs-repo] on a different account (e.g. bot/personal account), you can use the `fork-user` input to specify the username of the account where the fork is present.
 
