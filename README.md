@@ -162,11 +162,11 @@ I'm grateful to [Russell Banks][russellbanks-github-profile], the creator of Kom
 
 ## 🌟 Stargazers over time 👀
 
-[![Stargazers over time](https://starchart.cc/vedantmgoyal9/winget-releaser.svg)](https://starchart.cc/vedantmgoyal9/winget-releaser)
+[![Stargazers over time](http://web.archive.org/web/20260517014756/https://starchart.cc/vedantmgoyal9/winget-releaser.svg)](https://starchart.cc/vedantmgoyal9/winget-releaser)
 
 ## Contributors ✨
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+Thanks goes to these wonderful people ([emoji key](http://web.archive.org/web/20251112051405/https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
