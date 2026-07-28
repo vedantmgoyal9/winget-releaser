@@ -163,6 +163,7 @@ I'm grateful to [Russell Banks][russellbanks-github-profile], the creator of Kom
 ## 🌟 Stargazers over time 👀
 
 [![Stargazers over time](https://starchart.cc/vedantmgoyal9/winget-releaser.svg)](https://starchart.cc/vedantmgoyal9/winget-releaser)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fvedantmgoyal9%2Fwinget-releaser.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fvedantmgoyal9%2Fwinget-releaser?ref=badge_shield)
 
 ## Contributors ✨
 
@@ -237,3 +238,7 @@ Contributions of any kind welcome!
 [komac-repo]: https://github.com/russellbanks/komac
 [russellbanks-github-profile]: https://github.com/russellbanks
 [gh-encrypted-secrets]: https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fvedantmgoyal9%2Fwinget-releaser.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fvedantmgoyal9%2Fwinget-releaser?ref=badge_large)
