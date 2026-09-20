@@ -5,7 +5,7 @@
 ![GitHub release (latest by date)][github-release-badge]
 ![GitHub Repo stars][github-repo-stars-badge]
 ![GitHub][github-license-badge]
-[![Badge](<https://img.shields.io/badge/docs.bittu.eu.org%2Fdocs%2Fwinget--releaser--playground-abcdef?style=flat&logo=windowsterminal&label=Playground%20(dry-run)>)][playground-link]
+<!-- [![Badge](<https://img.shields.io/badge/docs.bittu.eu.org%2Fdocs%2Fwinget--releaser--playground-abcdef?style=flat&logo=windowsterminal&label=Playground%20(dry-run)>)][playground-link] -->
 
 Publish new releases of your application to the Windows Package Manager easily.
 
