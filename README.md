@@ -23,7 +23,15 @@ expediting the amount of time it takes for a submission to be reviewed and publi
 > At least **one** version of your package should already be present in the [Windows Package Manager Community Repository][winget-pkgs-repo].
 > The action will use that version as a base to create manifests for new versions of the package.
 
-1. You will need to create a _classic_ Personal Access Token (PAT) with `public_repo` scope. _New_ fine-grained PATs aren't supported by the action. Review https://github.com/vedantmgoyal9/winget-releaser/issues/172 for information.
+1. You will need to create a _classic_ Personal Access Token (PAT) with the `public_repo` and `workflow` scopes. The `workflow` scope is required when synchronizing changes to workflow files from the upstream `microsoft/winget-pkgs` repository. Without it, the action may fail intermittently when synchronizing changes. The `workflow` permission can be omitted, but you will need to manually sync the fork when this happens. _New_ fine-grained PATs aren't supported by the action.
+
+   ```text
+   Error:
+      0: <username> does not have the correct permissions to execute `UpdateRef`
+      1: failed to sync upstream changes
+   ```
+
+   If you encounter this error, add the `workflow` scope to the classic PAT used by the `token` input or manually sync the `winget-pkgs` fork via the web UI, then rerun the workflow.
 
 2. Fork [microsoft/winget-pkgs][winget-pkgs-repo] under the same account/organization as the project's repository. If you are forking [winget-pkgs][winget-pkgs-repo] on a different account (e.g. bot/personal account), you can use the `fork-user` input to specify the username of the account where the fork is present.
 
