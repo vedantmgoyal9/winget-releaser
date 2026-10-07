@@ -48,7 +48,7 @@ if (-not [int]::TryParse($MaxVersionsToKeep, [ref]$null) -or $MaxVersionsToKeep 
 }
 
 # Get release information
-Write-Output "==> Fetching release information from $RepositoryOwner/$ReleaseRepository at tag $ReleaseTag..."
+Write-Output "==> Fetching release information from $ReleaseRepository at tag $ReleaseTag..."
 $ReleaseInfo = gh api "repos/$ReleaseRepository/releases/tags/$ReleaseTag" | ConvertFrom-Json
 
 if ([string]::IsNullOrEmpty($Version)) {
