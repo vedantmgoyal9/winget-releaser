@@ -52,6 +52,7 @@ runs:
       run: cargo-binstall komac -y
       env:
         GITHUB_TOKEN: ${{ github.token }}
+      shell: pwsh
     - name: Run action
       id: action
       run: pwsh "$env:GITHUB_ACTION_PATH/winget-releaser.ps1"
