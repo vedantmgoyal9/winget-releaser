@@ -20,7 +20,7 @@ inputs:
   release-repository:
     description: The repository where the release is located.
     required: true
-    default: ${{ github.event.repository.name }}
+    default: ${{ github.repository }}
   release-tag:
     description: The tag of the GitHub release you want to publish to WinGet.
     required: true
@@ -52,7 +52,6 @@ runs:
       run: cargo-binstall komac -y
       env:
         GITHUB_TOKEN: ${{ github.token }}
-      shell: bash
     - name: Run action
       id: action
       run: pwsh "$env:GITHUB_ACTION_PATH/winget-releaser.ps1"
@@ -64,12 +63,11 @@ runs:
         INPUT_RELEASE_REPOSITORY: ${{ inputs.release-repository }}
         INPUT_RELEASE_TAG: ${{ inputs.release-tag }}
         INPUT_RELEASE_NOTES_URL: ${{ inputs.release-notes-url }}
-        INPUT_REPOSITORY_OWNER: ${{ github.repository_owner }}
         KOMAC_FORK_OWNER: ${{ inputs.fork-user }}
         KOMAC_CREATED_WITH: WinGet Releaser
         KOMAC_CREATED_WITH_URL: ${{ github.server_url }}/${{ github.action_repository }}
-        GITHUB_TOKEN: ${{ inputs.token }}
         GH_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ inputs.token }}
       shell: pwsh
 
 branding:
