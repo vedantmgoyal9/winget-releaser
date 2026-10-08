@@ -28,6 +28,9 @@ inputs:
   release-notes-url:
     description: URL to the package version's release notes.
     required: false
+  installers-architecture:
+    description: Overrides the `Architecture` of matched installers in the manifest (`x86`, `x64`, `arm`, `arm64` or `neutral`). Either a single architecture for all installers, or one `<regex> = <architecture>` rule per line, matched against asset names (first match wins). Leave unset to keep the architecture detected by Komac.
+    required: false
   token:
     description: GitHub token to create PR at winget-pkgs. The token should have a `public_repo` scope.
     required: true
@@ -64,6 +67,7 @@ runs:
         INPUT_RELEASE_REPOSITORY: ${{ inputs.release-repository }}
         INPUT_RELEASE_TAG: ${{ inputs.release-tag }}
         INPUT_RELEASE_NOTES_URL: ${{ inputs.release-notes-url }}
+        INPUT_INSTALLERS_ARCHITECTURE: ${{ inputs.installers-architecture }}
         KOMAC_FORK_OWNER: ${{ inputs.fork-user }}
         KOMAC_CREATED_WITH: WinGet Releaser
         KOMAC_CREATED_WITH_URL: ${{ github.server_url }}/${{ github.action_repository }}

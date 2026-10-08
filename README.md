@@ -159,6 +159,35 @@ jobs:
 | `fork-user` (Optional)            | The GitHub user where [winget-pkgs][winget-pkgs-repo] fork is present. This fork will be used to create PR at [WinGet Community Repository][winget-pkgs-repo].                | **Default**: `${{ github.repository_owner }} # repository owner` <br> **Example**: `dotnet-winget-bot`                                                                    |
 | `token` **(Mandatory)**           | GitHub token to create PR at [winget-pkgs][winget-pkgs-repo]. **The token should have a `public_repo` scope.**                                                                | **Example**: `token: ${{ secrets.WINGET_TOKEN }} # Repository secret called 'WINGET_TOKEN'`                                                                               |
 | `release-notes-url` (Optional)    | URL to package version's release notes.                                                                                                                                       | **Default**: GitHub release page <br> **Example**: `release-notes-url: https://example.com/release-notes/${{ github.event.release.tag_name }}`                            |
+| `installers-architecture` (Optional) | Overrides the `Architecture` of matched installers, when Komac detects it wrong from the file name. See [below](#overriding-the-detected-architecture).                       | **Default**: Detected by Komac <br> **Values**: `x86`, `x64`, `arm`, `arm64`, `neutral` <br> **Example**: `installers-architecture: x64`                                  |
+
+### Overriding the detected architecture
+
+Komac reads the architecture from the installer itself, but then replaces it with one guessed from the download URL, picking the **last** architecture name in it. File names with target triples can confuse this: a 64-bit `scala-cli-x86_64-pc-win32.msi` is detected as `x86` because `win32` comes after `x86_64`, and WinGet validation then fails. Use `installers-architecture` to set the correct value.
+
+A single architecture applies to all installers matched by `installers-regex`:
+
+```yaml
+- uses: vedantmgoyal9/winget-releaser@main
+  with:
+    identifier: Package.Identifier
+    installers-regex: '-x86_64-pc-win32\.msi$'
+    installers-architecture: x64
+    token: ${{ secrets.WINGET_TOKEN }}
+```
+
+If a release has installers for several architectures, give one `<regex> = <architecture>` rule per line. Each regex is matched against the asset name and the first matching rule wins. Installers that no rule matches keep the architecture detected by Komac.
+
+```yaml
+- uses: vedantmgoyal9/winget-releaser@main
+  with:
+    identifier: Package.Identifier
+    installers-regex: '-pc-win32\.msi$'
+    installers-architecture: |
+      x86_64-pc-win32\.msi$ = x64
+      aarch64-pc-win32\.msi$ = arm64
+    token: ${{ secrets.WINGET_TOKEN }}
+```
 
 ## Outputs
 

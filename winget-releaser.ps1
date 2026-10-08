@@ -8,6 +8,7 @@ param(
     [string]$ReleaseRepository = $env:INPUT_RELEASE_REPOSITORY,
     [string]$ReleaseTag = $env:INPUT_RELEASE_TAG,
     [string]$ReleaseNotesUrl = $env:INPUT_RELEASE_NOTES_URL,
+    [string]$InstallersArchitecture = $env:INPUT_INSTALLERS_ARCHITECTURE,
     [switch]$Test
 )
 
@@ -47,6 +48,27 @@ if (-not [int]::TryParse($MaxVersionsToKeep, [ref]$null) -or $MaxVersionsToKeep 
     exit 1
 }
 
+# Parse installers-architecture: one '<regex> = <architecture>' rule per line, or a bare architecture for all installers
+# The rule is split at the last '=', since architectures accepted by komac never contain it, but a regex might
+$ValidArchitectures = @('x86', 'x64', 'arm', 'arm64', 'neutral')
+$ArchitectureRules = @()
+foreach ($Line in $InstallersArchitecture -split '\r?\n') {
+    if (-not $Line.Trim()) { continue }
+    $Separator = $Line.LastIndexOf('=')
+    $Regex = if ($Separator -ge 0) { $Line.Substring(0, $Separator).Trim() } else { '' }
+    $Architecture = $Line.Substring($Separator + 1).Trim()
+    if ($Architecture -cnotin $ValidArchitectures) {
+        Write-Output "::error::Invalid input: installers-architecture '$Architecture' (in '$($Line.Trim())') should be one of: $($ValidArchitectures -join ', ')."
+        exit 1
+    }
+    try { [void][regex]::new($Regex) }
+    catch {
+        Write-Output "::error::Invalid input: installers-architecture regex '$Regex' is not a valid regular expression."
+        exit 1
+    }
+    $ArchitectureRules += [pscustomobject]@{ Regex = $Regex; Architecture = $Architecture }
+}
+
 # Get release information
 Write-Output "==> Fetching release information from $ReleaseRepository at tag $ReleaseTag..."
 $ReleaseInfo = gh api "repos/$ReleaseRepository/releases/tags/$ReleaseTag" | ConvertFrom-Json
@@ -58,11 +80,28 @@ else {
     $ResolvedVersion = $Version
 }
 
-$Urls = ($ReleaseInfo.assets.Where({ $_.name -match $InstallersRegex }).browser_download_url)
+$Assets = $ReleaseInfo.assets.Where({ $_.name -match $InstallersRegex })
+$Urls = ($Assets.browser_download_url)
 
 if (-not $Urls) {
     Write-Output "::error::No release assets found matching installers-regex '$InstallersRegex' for $ReleaseRepository@$ReleaseTag."
     exit 1
+}
+
+# komac uses the text after the last '|' in an installer URL as its architecture,
+# instead of the one detected from the URL (e.g. 'x86_64-pc-win32.msi' is detected as x86)
+# The first rule matching the asset name wins, assets without a matching rule are left to komac
+if ($ArchitectureRules) {
+    foreach ($Rule in $ArchitectureRules) {
+        if (-not $Assets.Where({ $_.name -match $Rule.Regex })) {
+            Write-Output "::warning::installers-architecture rule '$($Rule.Regex) = $($Rule.Architecture)' does not match any installer."
+        }
+    }
+    $Urls = $Assets | ForEach-Object {
+        $Asset = $_
+        $Rule = $ArchitectureRules.Where({ $Asset.name -match $_.Regex }, 'First')
+        if ($Rule) { "$($Asset.browser_download_url)|$($Rule.Architecture)" } else { $Asset.browser_download_url }
+    }
 }
 
 Write-Output "==> Syncing fork with upstream..."
